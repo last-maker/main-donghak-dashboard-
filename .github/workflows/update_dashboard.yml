@@ -1,0 +1,53 @@
+name: Update Investment Dashboard
+
+on:
+  schedule:
+    # 매일 한국 시간 07:50 (UTC 22:50)에 실행
+    - cron: '50 22 * * *'
+  workflow_dispatch: # GitHub 웹 UI에서 수동 실행 가능하도록 설정
+
+permissions:
+  contents: write # 변경된 HTML 파일을 커밋 및 푸시할 수 있도록 권한 부여
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Update Script
+        run: |
+          python3 update_dashboard.py
+
+      - name: Run Telegram Script
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
+        run: |
+          # 텔레그램 토큰들이 깃허브 시크릿으로 등록되어 있는 경우에만 텔레그램 스크립트 실행
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            python3 telegram_daily.py
+          else
+            echo "Telegram credentials not provided. Skipping notification."
+          fi
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add investment_dashboard.html
+          # 변경사항이 있는 경우에만 커밋 및 푸시 진행
+          if ! git diff --cached --quiet; then
+            git commit -m "Auto-update dashboard: $(date +'%Y-%m-%d %H:%M:%S')"
+            git push
+          else
+            echo "No changes to commit in investment_dashboard.html"
+          fi

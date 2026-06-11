@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.donghak.telegram</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>/Users/kimsun/프로그래밍/동학개미 지표2/동학개미지표2/telegram_daily.py</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/kimsun/프로그래밍/동학개미 지표2/동학개미지표2</string>
+
+  <!-- 매일 오전 8시 00분 자동 실행 -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>8</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+
+  <!-- Mac이 8시에 꺼져있던 경우 부팅 후 1회 실행 -->
+  <key>RunAtLoad</key>
+  <false/>
+
+  <!-- 로그 위치 -->
+  <key>StandardOutPath</key>
+  <string>/Users/kimsun/프로그래밍/동학개미 지표2/동학개미지표2/telegram_daily.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/kimsun/프로그래밍/동학개미 지표2/동학개미지표2/telegram_daily.log</string>
+</dict>
+</plist>

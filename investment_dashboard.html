@@ -1,0 +1,4165 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘의 투자 지표 대시보드 | 매일 업데이트되는 시장 신호</title>
+  <meta name="description"
+    content="종합 시장 신호등, 공포·탐욕 지수, 버핏 지표, 김치 프리미엄, 하이일드 스프레드, 수익률 곡선, VIX, 섹터 히트맵, 경제 캘린더까지 — 매일 아침 시장이 보내는 신호를 한 페이지에서 확인하세요.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <style>
+    /* ============ RESET & TOKENS ============ */
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .dk-root {
+      --bg-0: #050811;
+      --bg-1: #0a0f1c;
+      --bg-2: #0f1525;
+      --bg-3: #151b2e;
+      --line: #1e2740;
+      --line-2: #2a3550;
+      --line-3: #38476a;
+      --txt-0: #ffffff;
+      --txt-1: #e6ecff;
+      --txt-2: #9aa5c4;
+      --txt-3: #6b7796;
+      --txt-4: #4a5474;
+      --accent: #00e5ff;
+      --accent-2: #7c5cff;
+      --accent-3: #ff4d8d;
+      --up: #00ffa3;
+      --up-d: #00b377;
+      --down: #ff5871;
+      --down-d: #d43855;
+      --warn: #ffb84d;
+      --gold: #ffd966;
+      --glow-accent: 0 0 24px rgba(0, 229, 255, 0.4);
+      --glow-up: 0 0 16px rgba(0, 255, 163, 0.35);
+      --glow-down: 0 0 16px rgba(255, 88, 113, 0.35);
+      --radius-sm: 8px;
+      --radius: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+      --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 0 0 1px var(--line), 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+      --shadow-card-hover: 0 1px 0 rgba(255, 255, 255, 0.06) inset, 0 0 0 1px var(--line-2), 0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 229, 255, 0.06);
+    }
+
+    /* ============ BASE ============ */
+    .dk-root {
+      background: var(--bg-0);
+      color: var(--txt-1);
+      font-family: 'Pretendard', 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+      overflow: hidden;
+      overflow: clip;
+      /* sticky nav 동작을 위해 clip 사용 (미지원 브라우저는 hidden 폴백) */
+      border-radius: 16px;
+      isolation: isolate;
+    }
+
+    .dk-root *::selection {
+      background: rgba(0, 229, 255, 0.3);
+      color: #fff;
+    }
+
+    .dk-mono {
+      font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+      font-feature-settings: 'tnum' 1, 'ss01' 1;
+    }
+
+    .dk-display {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+    }
+
+    /* Background ambient layers */
+    .dk-root::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 600px 400px at 15% 0%, rgba(124, 92, 255, 0.10), transparent 60%),
+        radial-gradient(ellipse 700px 500px at 85% 10%, rgba(0, 229, 255, 0.08), transparent 60%),
+        radial-gradient(ellipse 500px 400px at 50% 100%, rgba(255, 77, 141, 0.05), transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .dk-root::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      background-position: -1px -1px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 80%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .dk-wrap {
+      position: relative;
+      z-index: 2;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 22px 60px;
+    }
+
+    /* ============ TICKER MARQUEE ============ */
+    .dk-ticker {
+      position: relative;
+      background: linear-gradient(180deg, rgba(15, 21, 37, 0.9), rgba(15, 21, 37, 0.6));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 0;
+      margin-bottom: 28px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .dk-ticker::before,
+    .dk-ticker::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 60px;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .dk-ticker::before {
+      left: 0;
+      background: linear-gradient(90deg, var(--bg-0) 30%, transparent);
+    }
+
+    .dk-ticker::after {
+      right: 0;
+      background: linear-gradient(-90deg, var(--bg-0) 30%, transparent);
+    }
+
+    .dk-marquee {
+      display: flex;
+      width: max-content;
+      animation: dk-scroll 50s linear infinite;
+      padding: 12px 0;
+    }
+
+    .dk-marquee:hover {
+      animation-play-state: paused;
+    }
+
+    @keyframes dk-scroll {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    .dk-tick-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 24px;
+      border-right: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .dk-tick-name {
+      font-size: 12px;
+      color: var(--txt-2);
+      font-weight: 600;
+    }
+
+    .dk-tick-price {
+      font-size: 13px;
+      color: var(--txt-0);
+      font-weight: 700;
+    }
+
+    .dk-tick-chg {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* ============ HEADER ============ */
+    .dk-header {
+      position: relative;
+      margin-bottom: 36px;
+      padding: 28px 30px;
+      background:
+        radial-gradient(ellipse 700px 200px at 0% 100%, rgba(124, 92, 255, 0.15), transparent 60%),
+        linear-gradient(135deg, rgba(15, 21, 37, 0.95) 0%, rgba(10, 15, 28, 0.85) 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+
+    .dk-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.6;
+    }
+
+    .dk-head-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .dk-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      padding: 5px 10px;
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: 999px;
+    }
+
+    .dk-eyebrow .dk-eye-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+      animation: dk-pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes dk-pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.4;
+        transform: scale(0.7);
+      }
+    }
+
+    .dk-h1 {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      font-size: clamp(26px, 4.5vw, 40px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--txt-0);
+      margin-bottom: 8px;
+    }
+
+    .dk-h1 .dk-grad {
+      background: linear-gradient(135deg, #00e5ff 0%, #7c5cff 50%, #ff4d8d 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .dk-sub {
+      font-size: 14px;
+      color: var(--txt-2);
+      max-width: 600px;
+    }
+
+    .dk-live {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--txt-3);
+    }
+
+    .dk-live-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--txt-1);
+      font-weight: 600;
+    }
+
+    .dk-live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 255, 163, 0.08);
+      border: 1px solid rgba(0, 255, 163, 0.3);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--up);
+    }
+
+    .dk-live-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--up);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--up);
+      animation: dk-pulse 1.8s ease-in-out infinite;
+    }
+
+    /* Header status row */
+    .dk-status-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+    }
+
+    .dk-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .dk-stat-l {
+      font-size: 10px;
+      color: var(--txt-3);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .dk-stat-v {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--txt-0);
+    }
+
+    .dk-stat-sub {
+      font-size: 11px;
+      color: var(--txt-2);
+    }
+
+    .dk-stat-up {
+      color: var(--up);
+      text-shadow: var(--glow-up);
+    }
+
+    .dk-stat-down {
+      color: var(--down);
+      text-shadow: var(--glow-down);
+    }
+
+    /* Bookmark CTA */
+    .dk-bookmark {
+      margin-top: 22px;
+      background: linear-gradient(90deg, rgba(0, 229, 255, 0.08), rgba(124, 92, 255, 0.06) 60%, transparent);
+      border: 1px solid rgba(0, 229, 255, 0.25);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-size: 13px;
+      color: var(--txt-1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dk-bookmark .dk-bm-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #00e5ff, #7c5cff);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0, 229, 255, 0.25);
+    }
+
+    .dk-bookmark-btn {
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .dk-bookmark-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(0, 229, 255, 0.55);
+      box-shadow: 0 8px 24px rgba(0, 229, 255, 0.18);
+    }
+
+    .dk-bookmark-btn:active {
+      transform: translateY(0);
+    }
+
+    .dk-bm-text {
+      flex: 1;
+    }
+
+    .dk-bm-cta {
+      display: inline-block;
+      margin-left: 6px;
+      color: #00e5ff;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* 모달 */
+    .dk-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      font-family: 'Pretendard', 'Inter', 'Apple SD Gothic Neo', sans-serif;
+    }
+
+    .dk-modal.dk-show {
+      display: flex;
+    }
+
+    .dk-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 8, 18, 0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .dk-modal-box {
+      position: relative;
+      width: min(92vw, 440px);
+      background: linear-gradient(180deg, #131a2e 0%, #0d1326 100%);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-radius: 18px;
+      padding: 36px 28px 28px;
+      text-align: center;
+      box-shadow: 0 24px 72px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(124, 92, 255, 0.15) inset;
+      animation: dkPop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes dkPop {
+      from {
+        transform: translateY(14px) scale(0.96);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .dk-modal-x {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      font-size: 22px;
+      line-height: 1;
+      color: #9aa5c4;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    .dk-modal-x:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+
+    .dk-modal-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 14px;
+      background: linear-gradient(135deg, #00e5ff, #7c5cff);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 10px 28px rgba(0, 229, 255, 0.35);
+    }
+
+    .dk-modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #e6ecff;
+      margin-bottom: 18px;
+    }
+
+    .dk-modal-shortcut {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 800;
+      color: #00e5ff;
+      padding: 14px 18px;
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px dashed rgba(0, 229, 255, 0.35);
+      border-radius: 12px;
+      margin: 0 auto 16px;
+      display: inline-block;
+      letter-spacing: 0.05em;
+    }
+
+    .dk-modal-desc {
+      color: #aab3cf;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+
+    .dk-modal-go {
+      width: 100%;
+      padding: 13px 18px;
+      border: none;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #00e5ff, #7c5cff);
+      color: #0a0f1c;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .dk-modal-go:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0, 229, 255, 0.35);
+    }
+
+    /* Quick nav — sticky */
+    .dk-nav {
+      position: sticky;
+      top: 8px;
+      z-index: 80;
+      display: flex;
+      gap: 6px;
+      margin-bottom: 32px;
+      flex-wrap: nowrap;
+      padding: 8px;
+      background: rgba(10, 15, 28, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    .dk-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .dk-nav-item {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--txt-2);
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      text-decoration: none;
+      border: none;
+      background: transparent;
+    }
+
+    .dk-nav-item:hover {
+      color: var(--txt-0);
+      background: var(--bg-3);
+    }
+
+    .dk-nav-item.active {
+      color: var(--bg-0);
+      background: var(--accent);
+    }
+
+    /* ============ SECTION ============ */
+    .dk-section {
+      margin-bottom: 48px;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .dk-section.dk-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dk-sec-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 18px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .dk-sec-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dk-sec-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      padding: 3px 9px;
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      border-radius: 6px;
+    }
+
+    .dk-sec-title {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--txt-0);
+    }
+
+    .dk-sec-info {
+      font-size: 11px;
+      color: var(--txt-3);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .dk-info {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--bg-3);
+      border: 1px solid var(--line-2);
+      color: var(--txt-2);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .dk-info:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      transform: scale(1.1);
+    }
+
+    .dk-info-text {
+      background: linear-gradient(135deg, var(--bg-2), var(--bg-1));
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--txt-2);
+      margin-top: 14px;
+      line-height: 1.7;
+      display: none;
+      border-right: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dk-info-text.dk-show {
+      display: block;
+      animation: dk-fadein 0.3s ease;
+    }
+
+    @keyframes dk-fadein {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ============ ASSET CARDS ============ */
+    .dk-asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 12px;
+    }
+
+    .dk-asset {
+      position: relative;
+      background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      cursor: default;
+    }
+
+    .dk-asset:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card-hover);
+    }
+
+    .dk-asset::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .dk-asset:hover::before {
+      opacity: 1;
+    }
+
+    .dk-asset-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .dk-asset-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--txt-2);
+    }
+
+    .dk-asset-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .dk-asset-mini-chg {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+
+    .dk-chg-up {
+      color: var(--up);
+      background: rgba(0, 255, 163, 0.08);
+    }
+
+    .dk-chg-down {
+      color: var(--down);
+      background: rgba(255, 88, 113, 0.08);
+    }
+
+    .dk-asset-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--txt-0);
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .dk-spark {
+      height: 36px;
+      width: 100%;
+      margin-bottom: 4px;
+    }
+
+    .dk-asset-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--txt-3);
+      letter-spacing: 0.05em;
+    }
+
+    /* ============ CARD BASE ============ */
+    .dk-card {
+      background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 26px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dk-card-glow {
+      position: absolute;
+      top: -50%;
+      left: -10%;
+      width: 80%;
+      height: 200%;
+      background: radial-gradient(ellipse at center, rgba(0, 229, 255, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* ============ FEAR & GREED ============ */
+    .dk-fg-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .dk-fg-card {
+      text-align: center;
+      padding: 28px 24px;
+    }
+
+    .dk-fg-title {
+      font-size: 13px;
+      color: var(--txt-2);
+      margin-bottom: 8px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .dk-fg-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--txt-3);
+      letter-spacing: 0.05em;
+    }
+
+    .dk-gauge-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    .dk-gauge-val {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+
+    .dk-gauge-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 52px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--txt-0);
+    }
+
+    .dk-gauge-label {
+      font-size: 11px;
+      margin-top: 6px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .dk-gauge-zones {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--txt-4);
+      margin-top: 6px;
+      padding: 0 18px;
+      font-weight: 600;
+    }
+
+    .dk-fg-trend {
+      margin-top: 18px;
+      padding: 14px 16px;
+      background: var(--bg-3);
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-around;
+      font-size: 11px;
+      border: 1px solid var(--line);
+    }
+
+    .dk-fg-trend>div {
+      text-align: center;
+    }
+
+    .dk-fg-trend .dk-tl {
+      color: var(--txt-3);
+      margin-bottom: 4px;
+    }
+
+    .dk-fg-trend .dk-tv {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--txt-1);
+    }
+
+    .dk-fg-interp {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--txt-2);
+      line-height: 1.6;
+    }
+
+    /* ============ BUFFETT ============ */
+    .dk-buffett-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .dk-buffett-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(48px, 8vw, 72px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #ff5871 0%, #ff8da3 50%, #ffb84d 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 40px rgba(255, 88, 113, 0.3);
+    }
+
+    .dk-buffett-meta {
+      text-align: right;
+    }
+
+    .dk-buffett-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(255, 88, 113, 0.15), rgba(255, 77, 141, 0.15));
+      border: 1px solid rgba(255, 88, 113, 0.4);
+      color: var(--down);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .dk-buffett-sub {
+      font-size: 12px;
+      color: var(--txt-2);
+      max-width: 280px;
+    }
+
+    .dk-buffett-bar-wrap {
+      position: relative;
+      padding: 24px 8px 12px;
+      background: var(--bg-1);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      margin-bottom: 18px;
+    }
+
+    .dk-buffett-bar {
+      position: relative;
+      height: 16px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #00ffa3 0%, #00ffa3 25%, #00e5ff 25%, #00e5ff 50%, #ffb84d 50%, #ffb84d 75%, #ff5871 75%, #ff5871 100%);
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .dk-buffett-historic {
+      position: absolute;
+      top: -16px;
+      width: 2px;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.4);
+      transform: translateX(-50%);
+    }
+
+    .dk-buffett-historic::after {
+      content: attr(data-label);
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-3);
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .dk-buffett-marker {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      transition: left 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dk-buffett-marker-dot {
+      width: 22px;
+      height: 22px;
+      background: #fff;
+      border-radius: 50%;
+      border: 3px solid var(--bg-0);
+      box-shadow: 0 0 24px rgba(255, 255, 255, 0.7), 0 0 12px rgba(255, 88, 113, 0.6);
+      position: relative;
+    }
+
+    .dk-buffett-marker-dot::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 88, 113, 0.5);
+      animation: dk-ring 1.8s ease-out infinite;
+    }
+
+    @keyframes dk-ring {
+      from {
+        transform: scale(0.8);
+        opacity: 1;
+      }
+
+      to {
+        transform: scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    .dk-buffett-zones {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin-top: 16px;
+      font-size: 10px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .dk-bz-1 {
+      color: var(--up);
+    }
+
+    .dk-bz-2 {
+      color: var(--accent);
+    }
+
+    .dk-bz-3 {
+      color: var(--warn);
+    }
+
+    .dk-bz-4 {
+      color: var(--down);
+      font-weight: 800;
+    }
+
+    .dk-buffett-zones .dk-bz-pct {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      display: block;
+      margin-top: 3px;
+      color: var(--txt-3);
+    }
+
+    .dk-buffett-interp {
+      padding: 16px 18px;
+      background: linear-gradient(135deg, rgba(255, 88, 113, 0.08), rgba(255, 184, 77, 0.04));
+      border: 1px solid rgba(255, 88, 113, 0.25);
+      border-radius: var(--radius);
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--txt-1);
+    }
+
+    .dk-buffett-interp b {
+      color: var(--down);
+    }
+
+    /* ============ YIELD CURVE ============ */
+    .dk-yield-chart {
+      width: 100%;
+      height: 300px;
+      margin-bottom: 18px;
+    }
+
+    .dk-yield-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .dk-yield-stat {
+      background: var(--bg-1);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+
+    .dk-yield-stat .dk-l {
+      font-size: 10px;
+      color: var(--txt-3);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .dk-yield-stat .dk-v {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .dk-yield-warn {
+      padding: 14px 16px;
+      background: linear-gradient(135deg, rgba(255, 184, 77, 0.08), transparent);
+      border-left: 3px solid var(--warn);
+      border-right: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--txt-1);
+    }
+
+    /* ============ VIX ============ */
+    .dk-vix-card {
+      text-align: center;
+      padding: 32px 26px;
+    }
+
+    .dk-vix-band {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin-top: 18px;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .dk-vix-band>div {
+      padding: 8px 4px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+    }
+
+    .dk-vix-band .dk-vb-1 {
+      color: var(--up);
+      border-color: rgba(0, 255, 163, 0.2);
+    }
+
+    .dk-vix-band .dk-vb-2 {
+      color: var(--txt-1);
+      border-color: var(--line-2);
+    }
+
+    .dk-vix-band .dk-vb-3 {
+      color: var(--warn);
+      border-color: rgba(255, 184, 77, 0.3);
+    }
+
+    .dk-vix-band .dk-vb-4 {
+      color: var(--down);
+      border-color: rgba(255, 88, 113, 0.3);
+    }
+
+    .dk-vix-band .dk-vb-active {
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 0 0 1px currentColor;
+    }
+
+    .dk-vix-band-r {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-4);
+      display: block;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .dk-vix-explain {
+      margin-top: 18px;
+      font-size: 13px;
+      color: var(--txt-2);
+      line-height: 1.7;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* ============ SECTOR HEATMAP ============ */
+    .dk-sector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 8px;
+    }
+
+    .dk-sector-tile {
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      border: 1px solid var(--line);
+      background: var(--bg-2);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dk-sector-tile:hover {
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .dk-sector-tile::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--tile-bg, transparent);
+      opacity: 0.8;
+    }
+
+    .dk-sector-name {
+      position: relative;
+      z-index: 2;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--txt-1);
+    }
+
+    .dk-sector-pct {
+      position: relative;
+      z-index: 2;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .dk-sector-bar {
+      position: relative;
+      z-index: 2;
+      height: 3px;
+      border-radius: 2px;
+      margin-top: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+    }
+
+    .dk-sector-bar-fill {
+      height: 100%;
+      width: 0;
+      transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ============ ECON TABLE ============ */
+    .dk-econ {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .dk-econ-row {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 0.9fr;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--line);
+      align-items: center;
+      gap: 14px;
+      transition: background 0.2s;
+    }
+
+    .dk-econ-row:last-child {
+      border-bottom: none;
+    }
+
+    .dk-econ-row:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .dk-econ-row.dk-head {
+      background: var(--bg-1);
+      font-size: 10px;
+      color: var(--txt-3);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 22px;
+      font-weight: 700;
+    }
+
+    .dk-econ-ind {
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--txt-1);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dk-econ-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--txt-0);
+    }
+
+    .dk-econ-delta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .dk-econ-cat {
+      font-size: 11px;
+      color: var(--txt-3);
+    }
+
+    .dk-flag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .dk-flag-us {
+      background: rgba(0, 168, 232, 0.12);
+      color: #4dd0ff;
+      border: 1px solid rgba(77, 208, 255, 0.25);
+    }
+
+    .dk-flag-kr {
+      background: rgba(255, 88, 113, 0.12);
+      color: #ff7d92;
+      border: 1px solid rgba(255, 125, 146, 0.25);
+    }
+
+    /* ============ SENTIMENT ============ */
+    .dk-sentiment {
+      position: relative;
+      background:
+        radial-gradient(ellipse 500px 200px at 0% 0%, rgba(255, 184, 77, 0.15), transparent 60%),
+        radial-gradient(ellipse 500px 200px at 100% 100%, rgba(255, 88, 113, 0.1), transparent 60%),
+        linear-gradient(135deg, var(--bg-2), var(--bg-1));
+      border: 1px solid rgba(255, 184, 77, 0.3);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      overflow: hidden;
+    }
+
+    .dk-sent-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--warn);
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .dk-sent-tag .dk-st-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--warn);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--warn);
+      animation: dk-pulse 1.8s ease-in-out infinite;
+    }
+
+    .dk-sent-title {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      font-size: clamp(20px, 3vw, 26px);
+      font-weight: 800;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+      color: var(--txt-0);
+    }
+
+    .dk-sent-body {
+      font-size: 15px;
+      color: var(--txt-2);
+      line-height: 1.8;
+    }
+
+    .dk-sent-body b {
+      color: var(--txt-0);
+    }
+
+    /* ============ FOOTER ============ */
+    .dk-footer {
+      margin-top: 50px;
+      padding: 24px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      text-align: center;
+      font-size: 12px;
+      color: var(--txt-3);
+      line-height: 1.8;
+    }
+
+    .dk-disc {
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      background: var(--bg-1);
+      border-radius: 10px;
+      color: var(--txt-2);
+      border: 1px solid var(--line);
+    }
+
+    .dk-disc b {
+      color: var(--txt-1);
+    }
+
+    .dk-src {
+      font-size: 11px;
+      color: var(--txt-4);
+    }
+
+    .dk-src b {
+      color: var(--txt-2);
+    }
+
+    .dk-cycle {
+      font-size: 11px;
+      color: var(--txt-3);
+      margin-top: 6px;
+    }
+
+    /* ============ DIVIDER ============ */
+    .dk-div {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--line-2) 30%, var(--line-2) 70%, transparent);
+      margin: 0 0 40px;
+    }
+
+    /* ============ SIGNAL HERO (종합 시장 신호등) ============ */
+    .dk-signal {
+      position: relative;
+      background:
+        radial-gradient(ellipse 600px 260px at 8% 0%, rgba(0, 229, 255, 0.10), transparent 60%),
+        radial-gradient(ellipse 500px 240px at 95% 100%, rgba(124, 92, 255, 0.10), transparent 60%),
+        linear-gradient(135deg, var(--bg-2), var(--bg-1));
+      border: 1px solid var(--line-2);
+      border-radius: var(--radius-xl);
+      padding: 30px 32px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .dk-signal::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--sig-col, var(--accent)), transparent);
+    }
+
+    .dk-sig-grid {
+      display: grid;
+      grid-template-columns: 230px 1fr;
+      gap: 34px;
+      align-items: center;
+    }
+
+    .dk-sig-left {
+      text-align: center;
+    }
+
+    .dk-sig-lights {
+      display: inline-flex;
+      gap: 12px;
+      padding: 10px 16px;
+      background: var(--bg-0);
+      border: 1px solid var(--line-2);
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    .dk-sig-light {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--bg-3);
+      border: 1px solid var(--line-2);
+      opacity: 0.35;
+      transition: all 0.5s ease;
+    }
+
+    .dk-sig-light.on {
+      opacity: 1;
+      box-shadow: 0 0 18px var(--lc), 0 0 40px var(--lc);
+      background: var(--lc);
+      border-color: transparent;
+      animation: dk-pulse 2s ease-in-out infinite;
+    }
+
+    .dk-sig-light.r {
+      --lc: var(--down);
+    }
+
+    .dk-sig-light.y {
+      --lc: var(--warn);
+    }
+
+    .dk-sig-light.g {
+      --lc: var(--up);
+    }
+
+    .dk-sig-score {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--txt-0);
+    }
+
+    .dk-sig-score small {
+      font-size: 22px;
+      color: var(--txt-3);
+      font-weight: 600;
+    }
+
+    .dk-sig-verdict {
+      margin-top: 8px;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+
+    .dk-sig-bar {
+      position: relative;
+      height: 10px;
+      border-radius: 5px;
+      margin-top: 16px;
+      background: linear-gradient(90deg, var(--down) 0%, var(--warn) 45%, var(--up) 100%);
+      opacity: 0.9;
+    }
+
+    .dk-sig-bar-marker {
+      position: absolute;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border: 3px solid var(--bg-0);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.7);
+      transition: left 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dk-sig-right .dk-sent-tag {
+      margin-bottom: 10px;
+    }
+
+    .dk-sig-head {
+      font-family: 'Inter', 'Pretendard', 'Noto Sans KR', sans-serif;
+      font-size: clamp(18px, 2.6vw, 24px);
+      font-weight: 800;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+      color: var(--txt-0);
+      margin-bottom: 10px;
+    }
+
+    .dk-sig-body {
+      font-size: 14px;
+      color: var(--txt-2);
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+
+    .dk-sig-body b {
+      color: var(--txt-0);
+    }
+
+    .dk-sig-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .dk-sig-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 11px;
+      border-radius: 999px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-2);
+      color: var(--txt-2);
+    }
+
+    .dk-sig-chip .dk-mono {
+      font-size: 11px;
+    }
+
+    .dk-sig-chip .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    /* ============ WHAT CHANGED (어제와 달라진 점) ============ */
+    .dk-changed {
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 18px 22px;
+      margin-bottom: 32px;
+    }
+
+    .dk-changed-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .dk-changed-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 10px;
+    }
+
+    .dk-changed-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 12.5px;
+      color: var(--txt-2);
+      line-height: 1.55;
+      padding: 10px 12px;
+      background: var(--bg-1);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+
+    .dk-changed-item b {
+      color: var(--txt-0);
+    }
+
+    .dk-changed-item .ci {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    /* ============ KIMCHI PREMIUM ============ */
+    .dk-kimchi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .dk-kimchi-main {
+      text-align: center;
+      padding: 30px 24px;
+    }
+
+    .dk-kimchi-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(44px, 7vw, 62px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .dk-kimchi-sub {
+      font-size: 12px;
+      color: var(--txt-3);
+      margin-top: 8px;
+    }
+
+    .dk-kimchi-badge {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 5px 13px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      border: 1px solid;
+    }
+
+    .dk-kp-bar-wrap {
+      padding: 26px 10px 10px;
+    }
+
+    .dk-kp-bar {
+      position: relative;
+      height: 14px;
+      border-radius: 7px;
+      background: linear-gradient(90deg, #4dd0ff 0%, #00ffa3 30%, #ffd966 55%, #ffb84d 75%, #ff5871 100%);
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .dk-kp-marker {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      background: #fff;
+      border: 3px solid var(--bg-0);
+      border-radius: 50%;
+      box-shadow: 0 0 18px rgba(255, 255, 255, 0.65);
+      transition: left 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dk-kp-scale {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--txt-4);
+      margin-top: 8px;
+      padding: 0 2px;
+    }
+
+    .dk-kimchi-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .dk-kimchi-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 13px 16px;
+      background: var(--bg-1);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--txt-2);
+    }
+
+    .dk-kimchi-row .v {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--txt-0);
+      font-size: 14px;
+    }
+
+    .dk-kimchi-interp {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--txt-2);
+      line-height: 1.7;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* ============ HIGH-YIELD SPREAD ============ */
+    .dk-hy-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .dk-hy-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(44px, 7vw, 62px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .dk-hy-zones {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      margin-top: 14px;
+      font-size: 10px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .dk-hy-zones .dk-bz-pct {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      display: block;
+      margin-top: 3px;
+      color: var(--txt-3);
+    }
+
+    .dk-hy-bar {
+      position: relative;
+      height: 16px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #00ffa3 0%, #00ffa3 30%, #00e5ff 30%, #00e5ff 50%, #ffb84d 50%, #ffb84d 70%, #ff5871 70%, #ff5871 100%);
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .dk-hy-interp {
+      margin-top: 18px;
+      padding: 16px 18px;
+      background: linear-gradient(135deg, rgba(0, 255, 163, 0.06), transparent);
+      border: 1px solid var(--line-2);
+      border-radius: var(--radius);
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--txt-1);
+    }
+
+    /* ============ ECON CALENDAR ============ */
+    .dk-cal {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dk-cal-row {
+      display: grid;
+      grid-template-columns: 86px 96px 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 15px 20px;
+      background: var(--bg-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      transition: all 0.25s;
+    }
+
+    .dk-cal-row:hover {
+      border-color: var(--line-3);
+      transform: translateX(3px);
+    }
+
+    .dk-cal-row.dk-cal-today {
+      border-color: rgba(0, 229, 255, 0.5);
+      background: linear-gradient(90deg, rgba(0, 229, 255, 0.07), var(--bg-2) 50%);
+    }
+
+    .dk-cal-dday {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+      padding: 6px 0;
+      border-radius: 8px;
+      background: var(--bg-1);
+      border: 1px solid var(--line-2);
+      color: var(--txt-1);
+    }
+
+    .dk-cal-dday.hot {
+      color: var(--accent);
+      border-color: rgba(0, 229, 255, 0.4);
+      box-shadow: 0 0 14px rgba(0, 229, 255, 0.12);
+    }
+
+    .dk-cal-date {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--txt-3);
+      font-weight: 600;
+    }
+
+    .dk-cal-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--txt-1);
+    }
+
+    .dk-cal-name small {
+      display: block;
+      font-size: 11px;
+      color: var(--txt-3);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    .dk-cal-imp {
+      display: flex;
+      gap: 3px;
+    }
+
+    .dk-cal-imp i {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--bg-3);
+      border: 1px solid var(--line-2);
+    }
+
+    .dk-cal-imp i.on {
+      background: var(--warn);
+      border-color: transparent;
+      box-shadow: 0 0 8px rgba(255, 184, 77, 0.5);
+    }
+
+    /* ============ SECTOR TREEMAP ============ */
+    .dk-sector-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .dk-sector-tile {
+      min-width: 130px;
+      min-height: 96px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .dk-sector-w {
+      position: relative;
+      z-index: 2;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      color: var(--txt-4);
+      letter-spacing: 0.05em;
+      margin-top: 6px;
+    }
+
+    /* ============ GAUGE ZONE HIGHLIGHT ============ */
+    .dk-gauge-zones span {
+      transition: all 0.3s;
+      padding: 2px 6px;
+      border-radius: 5px;
+    }
+
+    .dk-gauge-zones span.dk-zone-on {
+      color: var(--txt-0);
+      background: rgba(255, 255, 255, 0.08);
+      font-weight: 800;
+      box-shadow: inset 0 0 0 1px var(--line-3);
+    }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 880px) {
+      .dk-wrap {
+        padding: 20px 14px 50px;
+      }
+
+      .dk-header {
+        padding: 22px 20px;
+        border-radius: var(--radius-lg);
+      }
+
+      .dk-status-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+
+      .dk-sig-grid {
+        grid-template-columns: 1fr;
+        gap: 22px;
+      }
+
+      .dk-sig-left {
+        max-width: 320px;
+        margin: 0 auto;
+      }
+
+      .dk-kimchi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dk-cal-row {
+        grid-template-columns: 64px 1fr auto;
+        gap: 10px;
+        padding: 13px 14px;
+      }
+
+      .dk-cal-date {
+        display: none;
+      }
+
+      .dk-sector-tile {
+        min-width: 104px;
+        min-height: 84px;
+      }
+
+      .dk-sec-title {
+        font-size: 19px;
+      }
+
+      .dk-asset-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .dk-asset {
+        padding: 14px;
+      }
+
+      .dk-asset-price {
+        font-size: 18px;
+      }
+
+      .dk-econ-row {
+        grid-template-columns: 1.5fr 1fr 1fr;
+        gap: 10px;
+        padding: 14px 16px;
+      }
+
+      .dk-econ-cat {
+        display: none;
+      }
+
+      .dk-sector-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .dk-gauge-num {
+        font-size: 42px;
+      }
+
+      .dk-sentiment {
+        padding: 24px 22px;
+      }
+
+      .dk-card {
+        padding: 22px 18px;
+      }
+
+      .dk-buffett-bar-wrap {
+        padding: 20px 4px 8px;
+      }
+
+      .dk-buffett-zones {
+        font-size: 9px;
+      }
+
+      .dk-buffett-zones .dk-bz-pct {
+        font-size: 9px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .dk-asset-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .dk-status-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .dk-sig-score {
+        font-size: 52px;
+      }
+
+      .dk-changed-list {
+        grid-template-columns: 1fr;
+      }
+
+      .dk-fg-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dk-sector-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .dk-asset-name {
+        font-size: 11px;
+      }
+
+      .dk-tick-item {
+        padding: 0 16px;
+      }
+    }
+
+    /* ============================================================
+   ★ TISTORY SKIN OVERRIDE — 외부 스킨 충돌 최소 차단판
+   - text-shadow / font-family / padding 은 건드리지 않는다
+   - 색·밑줄·테두리만 정확히 보호한다
+   ============================================================ */
+
+    /* 1) 대시보드 내부 모든 a 태그: 티스토리 기본 링크 색·밑줄 차단 */
+    .dk-root a,
+    .dk-root a:link,
+    .dk-root a:visited,
+    .dk-root a:hover,
+    .dk-root a:active,
+    .dk-root a:focus {
+      color: inherit !important;
+      text-decoration: none !important;
+      background-color: transparent !important;
+      border-bottom: none !important;
+    }
+
+    /* 2) 네비게이션 버튼 색 복원 (a 태그라 1번에서 inherit 처리됨) */
+    .dk-root .dk-nav-item {
+      color: var(--txt-2) !important;
+    }
+
+    .dk-root .dk-nav-item:hover {
+      color: var(--txt-0) !important;
+      background: var(--bg-3) !important;
+    }
+
+    .dk-root .dk-nav-item.active {
+      color: var(--bg-0) !important;
+      background: var(--accent) !important;
+    }
+
+    /* 3) 헤딩(h1~h6): 티스토리 기본 검정색·밑줄·border만 차단 (폰트/여백은 원본 유지) */
+    .dk-root h1,
+    .dk-root h2,
+    .dk-root h3,
+    .dk-root h4,
+    .dk-root h5,
+    .dk-root h6 {
+      background: transparent !important;
+      border: none !important;
+      border-bottom: none !important;
+      text-decoration: none !important;
+    }
+
+    /* 4) 실제 사용 중인 헤딩 2개: 원본 폰트·굵기·색 명시 잠금
+   ⚠️ 티스토리 스킨이 h1/h2에 font-weight 강제 주입하므로 !important 필수 */
+    .dk-root .dk-h1 {
+      color: var(--txt-0) !important;
+      font-family: 'Inter', 'Noto Sans KR', sans-serif !important;
+      font-weight: 900 !important;
+    }
+
+    .dk-root .dk-h1 .dk-grad {
+      -webkit-text-fill-color: transparent !important;
+    }
+
+    .dk-root .dk-sent-title {
+      color: var(--txt-0) !important;
+      font-family: 'Inter', 'Noto Sans KR', sans-serif !important;
+      font-weight: 800 !important;
+    }
+
+    .dk-root .dk-sent-body {
+      color: var(--txt-2) !important;
+      font-weight: 400 !important;
+    }
+
+    .dk-root .dk-sent-body b,
+    .dk-root .dk-sent-body strong {
+      color: var(--txt-0) !important;
+      font-weight: 700 !important;
+    }
+
+    /* 섹션 타이틀·카드 타이틀 굵기 잠금 — 방어적 */
+    .dk-root .dk-sec-title {
+      font-weight: 800 !important;
+    }
+
+    .dk-root .dk-card-title {
+      font-weight: 700 !important;
+    }
+
+    /* 5) 핵심 숫자/값: 밑줄·폰트만 잠금 (color/text-shadow 는 원본 룰이 처리) */
+    .dk-root .dk-stat-v,
+    .dk-root .dk-tv,
+    .dk-root .dk-fg-trend .dk-tv,
+    .dk-root .dk-gauge-num,
+    .dk-root .dk-buffett-val,
+    .dk-root .dk-econ-val,
+    .dk-root .dk-econ-delta,
+    .dk-root .dk-asset-price,
+    .dk-root .dk-asset-chg,
+    .dk-root .dk-vix-band-r,
+    .dk-root .dk-live-time {
+      text-decoration: none !important;
+      font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+    }
+
+    /* 6) 모달 안 링크/버튼 밑줄 차단 */
+    .dk-modal a,
+    .dk-modal button {
+      text-decoration: none !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 목차(TOC) 노출용 — 대시보드 보기 앵커 (티스토리 자동 목차가 h2를 감지함) -->
+  <div style="max-width:740px;margin:0 auto;font-family:'Noto Sans KR',Apple SD Gothic Neo,sans-serif;">
+    <h2 id="dashboard-view"
+      style="font-size:19px;font-weight:700;color:#1a1a2e;padding-bottom:8px;border-bottom:2px solid #3A7BD5;margin:8px 0 18px;">
+      📊 대시보드 보기</h2>
+  </div>
+
+  <div class="dk-root" id="dkRoot">
+    <div class="dk-wrap">
+
+      <!-- ===== HEADER ===== -->
+      <header class="dk-header">
+        <div class="dk-head-row">
+          <div>
+            <div class="dk-eyebrow"><span class="dk-eye-dot"></span>LIVE MARKET DASHBOARD</div>
+            <h1 class="dk-h1">오늘 시장이 보내는 <span class="dk-grad">신호</span>들</h1>
+            <p class="dk-sub">종합 시장 신호등부터 공포·탐욕, 버핏 지표, 김치 프리미엄, 수익률 곡선, VIX, 섹터, 경제 캘린더까지 — 매일 아침 한 페이지에서 시장의 온도를
+              점검하세요.</p>
+          </div>
+          <div class="dk-live">
+            <span class="dk-live-pill"><span class="dk-live-dot"></span>매일 갱신</span>
+            <span>데이터 기준 시각</span>
+            <span class="dk-live-time" id="dkTime">--:--</span>
+          </div>
+        </div>
+
+        <div class="dk-status-row" id="dkStatusRow"></div>
+
+        <button class="dk-bookmark dk-bookmark-btn" id="dkBookmarkBtn" type="button" aria-label="이 페이지 북마크하기">
+          <span class="dk-bm-icon">★</span>
+          <span class="dk-bm-text">이 페이지를 <b>북마크</b>해 두시면, 매일 아침 30초 만에 시장을 점검할 수 있어요. <span class="dk-bm-cta">클릭하여 추가
+              →</span></span>
+        </button>
+
+        <!-- 북마크 모달 -->
+        <div class="dk-modal" id="dkBmModal" aria-hidden="true">
+          <div class="dk-modal-backdrop" data-dk-close></div>
+          <div class="dk-modal-box" role="dialog" aria-modal="true">
+            <button class="dk-modal-x" data-dk-close type="button" aria-label="닫기">×</button>
+            <div class="dk-modal-icon">★</div>
+            <div class="dk-modal-title">즐겨찾기에 추가하기</div>
+            <div class="dk-modal-shortcut" id="dkBmShortcut">Ctrl + D</div>
+            <div class="dk-modal-desc" id="dkBmDesc">
+              위 키를 눌러 즐겨찾기에 바로 추가할 수 있어요.<br />
+              저장 후 매일 아침 한 번씩 들러주세요.
+            </div>
+            <button class="dk-modal-go" data-dk-close type="button">알겠습니다</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- ===== TICKER ===== -->
+      <div class="dk-ticker">
+        <div class="dk-marquee" id="dkMarquee"></div>
+      </div>
+
+      <!-- ===== ⓪ 종합 시장 신호등 (결론 우선) ===== -->
+      <section class="dk-section" id="dk-s0">
+        <div class="dk-signal" id="dkSignal">
+          <div class="dk-sig-grid">
+            <div class="dk-sig-left">
+              <div class="dk-sig-lights">
+                <span class="dk-sig-light r" id="dkLightR"></span>
+                <span class="dk-sig-light y" id="dkLightY"></span>
+                <span class="dk-sig-light g" id="dkLightG"></span>
+              </div>
+              <div class="dk-sig-score"><span id="dkSigScore">0</span><small> / 100</small></div>
+              <div class="dk-sig-verdict" id="dkSigVerdict">계산 중…</div>
+              <div class="dk-sig-bar">
+                <div class="dk-sig-bar-marker" id="dkSigMarker" style="left:50%;"></div>
+              </div>
+            </div>
+            <div class="dk-sig-right">
+              <div class="dk-sent-tag"><span class="dk-st-dot"></span>오늘의 시황 — 종합 신호</div>
+              <h2 class="dk-sig-head" id="dkSentTitle">…</h2>
+              <p class="dk-sig-body" id="dkSentBody">…</p>
+              <div class="dk-sig-chips" id="dkSigChips"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 어제와 달라진 점 -->
+        <div class="dk-changed">
+          <div class="dk-changed-title">⚡ 어제와 달라진 점</div>
+          <div class="dk-changed-list" id="dkChangedList"></div>
+        </div>
+      </section>
+
+      <!-- ===== QUICK NAV (sticky) ===== -->
+      <nav class="dk-nav">
+        <a class="dk-nav-item" href="#dk-s0">종합 신호</a>
+        <a class="dk-nav-item" href="#dk-s1">자산 시세</a>
+        <a class="dk-nav-item" href="#dk-s1b">김프</a>
+        <a class="dk-nav-item" href="#dk-s2">공포·탐욕</a>
+        <a class="dk-nav-item" href="#dk-s3">버핏</a>
+        <a class="dk-nav-item" href="#dk-s4">금리 곡선</a>
+        <a class="dk-nav-item" href="#dk-s4b">하이일드</a>
+        <a class="dk-nav-item" href="#dk-s5">VIX</a>
+        <a class="dk-nav-item" href="#dk-s6">섹터</a>
+        <a class="dk-nav-item" href="#dk-s7">매크로</a>
+        <a class="dk-nav-item" href="#dk-s9">캘린더</a>
+      </nav>
+
+      <!-- ===== ① ASSET CARDS ===== -->
+      <section class="dk-section" id="dk-s1">
+        <div class="dk-sec-head">
+          <div class="dk-sec-title-wrap">
+            <span class="dk-sec-num">01</span>
+            <span class="dk-sec-title">주요 자산 시세</span>
+            <span class="dk-info" onclick="dkInfo('info-1')">?</span>
+          </div>
+          <span class="dk-sec-info">전일 대비 / 7일 추세</span>
+        </div>
+        <div class="dk-info-text" id="info-1">
+          미국·한국 주식, 암호화폐, 안전자산(금), 환율 등 글로벌 자산의 흐름을 한눈에 확인할 수 있습니다. 각 카드의 미니 차트는 최근 7일간의 가격 추이입니다.
+        </div>
+        <div class="dk-asset-grid" id="dkAssetGrid"></div>
+      </section>
+
+      <div class="dk-div"></div>
+
+      <!-- ===== ②(NEW) 김치 프리미엄 ===== -->
+      <section class="dk-section" id="dk-s1b">
+        <div class="dk-sec-head">
+          <div class="dk-sec-title-wrap">
+            <span class="dk-sec-num">02</span>
+            <span class="dk-sec-title">김치 프리미엄</span>
+            <span class="dk-info" onclick="dkInfo('info-1b')">?</span>
+          </div>
+          <span class="dk-sec-info">UPBIT vs GLOBAL · BTC</span>
+        </div>
+        <div class="dk-info-text" id="info-1b">
+          국내 거래소(업비트)의 비트코인 가격이 글로벌 시세 대비 얼마나 비싼지(혹은 싼지)를 나타냅니다. 김프가 높을수록 한국 개인투자자의 매수 열기가 과열됐다는 뜻이고, 마이너스(역프)는 투자심리 냉각을
+          의미합니다.
+        </div>
+        <div class="dk-kimchi-grid">
+          <div class="dk-card dk-kimchi-main">
+            <div class="dk-card-glow"></div>
+            <div
+              style="font-size:12px;color:var(--txt-3);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:10px;">
+              현재 김치 프리미엄</div>
+            <div class="dk-kimchi-num dk-mono" id="dkKpNum">0%</div>
+            <div class="dk-kimchi-sub" id="dkKpSub">업비트 — 글로벌 시세 차이</div>
+            <div class="dk-kimchi-badge" id="dkKpBadge">—</div>
+            <div class="dk-kp-bar-wrap">
+              <div class="dk-kp-bar">
+                <div class="dk-kp-marker" id="dkKpMarker" style="left:50%;"></div>
+              </div>
+              <div class="dk-kp-scale"><span>-2%</span><span>0%</span><span>+2%</span><span>+5%</span><span>+10%</span>
+              </div>
+            </div>
+          </div>
+          <div class="dk-card">
+            <div class="dk-kimchi-rows" id="dkKpRows"></div>
+            <div class="dk-kimchi-interp" id="dkKpInterp"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="dk-div"></div>
+
+      <!-- ===== ③ FEAR & GREED ===== -->
+      <section class="dk-section" id="dk-s2">
+        <div class="dk-sec-head">
+          <div class="dk-sec-title-wrap">
+            <span class="dk-sec-num">03</span>
+            <span class="dk-sec-title">공포·탐욕 지수</span>
+            <span class="dk-info" onclick="dkInfo('info-2')">?</span>
+          </div>
+          <span class="dk-sec-info">FEAR &amp; GREED INDEX</span>
+        </div>
+        <div class="dk-info-text" id="info-2">
+          시장 참여자들의 감정을 0(극단적 공포) ~ 100(극단적 탐욕) 사이 수치로 환산한 지표입니다. 일반적으로 극단적 공포 구간은 매수 기회, 극단적 탐욕 구간은 조정 가능성을 시사합니다.
+        </div>
+        <div class="dk-fg-grid">
+          <div class="dk-card dk-fg-card">
+            <div class="dk-card-glow"></div>
+            <div class="dk-fg-title">주식시장 <span class="dk-fg-tag">CNN</span></div>
+            <div class="dk-gauge-wrap">
+              <svg viewBox="0 0 280 170" width="100%">
+                <defs>
+                  <linearGradient id="dkGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#ff5871" />
+                    <stop offset="25%" stop-color="#ffb84d" />
+                    <stop offset="50%" stop-color="#ffd966" />
+                    <stop offset="75%" stop-color="#00ffa3" />
+                    <stop offset="100%" stop-color="#00e5ff" />
+                  </linearGradient>
+                  <filter id="dkGlow">
+                    <feGaussianBlur stdDeviation="3" />
+                  </filter>
+                </defs>
+                <path d="M 40 140 A 100 100 0 0 1 240 140" stroke="#1e2740" stroke-width="20" fill="none"
+                  stroke-linecap="round" />
+                <path d="M 40 140 A 100 100 0 0 1 240 140" stroke="url(#dkGaugeGrad)" stroke-width="20" fill="none"
+                  stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" id="dkG1Arc"
+                  filter="url(#dkGlow)" opacity="0.35" />
+                <path d="M 40 140 A 100 100 0 0 1 240 140" stroke="url(#dkGaugeGrad)" stroke-width="20" fill="none"
+                  stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" id="dkG1ArcMain" />
+                <line id="dkG1Needle" x1="140" y1="140" x2="140" y2="55" stroke="#fff" stroke-width="3.5"
+                  stroke-linecap="round" transform="rotate(-90 140 140)" filter="url(#dkGlow)" />
+                <line x1="140" y1="140" x2="140" y2="55" stroke="#fff" stroke-width="3.5" stroke-linecap="round"
+                  transform="rotate(-90 140 140)" id="dkG1NeedleS" />
+                <circle cx="140" cy="140" r="9" fill="#0a0f1c" stroke="#fff" stroke-width="2.5" />
+                <circle cx="140" cy="140" r="3" fill="#fff" />
+              </svg>
+              <div class="dk-gauge-val">
+                <div class="dk-gauge-num" id="dkFgNum1">0</div>
+                <div class="dk-gauge-label" id="dkFgLab1" style="color:var(--txt-1)">—</div>
+              </div>
+            </div>
+            <div class="dk-gauge-zones" id="dkZones1">
+              <span>극공포</span><span>공포</span><span>중립</span><span>탐욕</span><span>극탐욕</span>
+            </div>
+            <div class="dk-fg-trend" id="dkFgTrend1"></div>
+            <div class="dk-fg-interp" id="dkFgInterp1"></div>
+          </div>
+
+          <div class="dk-card dk-fg-card">
+            <div class="dk-card-glow"></div>
+            <div class="dk-fg-title">암호화폐 <span class="dk-fg-tag">ALTERNATIVE.ME</span></div>
+            <div class="dk-gauge-wrap">
+              <svg viewBox="0 0 280 170" width="100%">
+                <path d="M 40 140 A 100 100 0 0 1 240 140" stroke="#1e2740" stroke-width="20" fill="none"
+                  stroke-linecap="round" />
+                <path d="M 40 140 A 100 100 0 0 1 240 140" stroke="url(#dkGaugeGrad)" stroke-width="20" fill="none"
+                  stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" id="dkG2Arc"
+                  filter="url(#dkGlow)" opacity="0.35" />
+                <path d="M 40 140 A 100 100 0 0 1 240 140" stroke="url(#dkGaugeGrad)" stroke-width="20" fill="none"
+                  stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" id="dkG2ArcMain" />
+                <line id="dkG2Needle" x1="140" y1="140" x2="140" y2="55" stroke="#fff" stroke-width="3.5"
+                  stroke-linecap="round" transform="rotate(-90 140 140)" />
+                <circle cx="140" cy="140" r="9" fill="#0a0f1c" stroke="#fff" stroke-width="2.5" />
+                <circle cx="140" cy="140" r="3" fill="#fff" />
+              </svg>
+              <div class="dk-gauge-val">
+                <div class="dk-gauge-num" id="dkFgNum2">0</div>
+                <div class="dk-gauge-label" id="dkFgLab2" style="color:var(--txt-1)">—</div>
+              </div>
+            </div>
+            <div class="dk-gauge-zones" id="dkZones2">
+              <span>극공포</span><span>공포</span><span>중립</span><span>탐욕</span><span>극탐욕</span>
+            </div>
+            <div class="dk-fg-trend" id="dkFgTrend2"></div>
+            <div class="dk-fg-interp" id="dkFgInterp2"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="dk-div"></div>
+
+      <!-- ===== ③ BUFFETT ===== -->
+      <section class="dk-section" id="dk-s3">
+        <div class="dk-sec-head">
+          <div class="dk-sec-title-wrap">
+            <span class="dk-sec-num">04</span>
+            <span class="dk-sec-title">버핏 지표</span>
+            <span class="dk-info" onclick="dkInfo('info-3')">?</span>
+          </div>
+          <span class="dk-sec-info">MARKET CAP / GDP</span>
+        </div>
+        <div class="dk-info-text" id="info-3">
+          워런 버핏이 "시장 밸류에이션 측정의 단일 최고 지표"라 평한 지표로, 미국 전체 주식 시가총액을 GDP로 나눈 값입니다. 100%를 넘으면 고평가, 150%를 넘으면 거품으로 분류됩니다.
+        </div>
+        <div class="dk-card">
+          <div class="dk-card-glow"
+            style="background:radial-gradient(ellipse at center, rgba(255,88,113,0.08) 0%, transparent 60%);"></div>
+          <div class="dk-buffett-top">
+            <div>
+              <div
+                style="font-size:12px;color:var(--txt-3);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px;">
+                현재 수치</div>
+              <div class="dk-buffett-num dk-mono"><span id="dkBuffettVal">0</span>%</div>
+            </div>
+            <div class="dk-buffett-meta">
+              <span class="dk-buffett-badge" id="dkBuffettBadge">—</span>
+              <div class="dk-buffett-sub" id="dkBuffettSub"></div>
+            </div>
+          </div>
+          <div class="dk-buffett-bar-wrap">
+            <div class="dk-buffett-bar" id="dkBuffettBar">
+              <div class="dk-buffett-historic" style="left:71%;" data-label="2021"></div>
+              <div class="dk-buffett-historic" style="left:75%;" data-label="2000"></div>
+              <div class="dk-buffett-marker" id="dkBuffettMarker" style="left:50%;">
+                <div class="dk-buffett-marker-dot"></div>
+              </div>
+            </div>
+            <div class="dk-buffett-zones">
+              <div class="dk-bz-1">저평가<span class="dk-bz-pct">&lt; 75%</span></div>
+              <div class="dk-bz-2">적정<span class="dk-bz-pct">75 ~ 115%</span></div>
+              <div class="dk-bz-3">고평가<span class="dk-bz-pct">115 ~ 150%</span></div>
+              <div class="dk-bz-4">버블<span class="dk-bz-pct">150% +</span></div>
+            </div>
+          </div>
+          <div class="dk-buffett-interp" id="dkBuffettInterp"></div>
+        </div>
+      </section>
+
+      <div class="dk-div"></div>
+
+      <!-- ===== ④ YIELD CURVE ===== -->
+      <section class="dk-section" id="dk-s4">
+        <div class="dk-sec-head">
+          <div class="dk-sec-title-wrap">
+            <span class="dk-sec-num">05</span>
+            <span class="dk-sec-title">미국 국채 수익률 곡선</span>
+            <span class="dk-info" onclick="dkInfo('info-4')">?</span>
+          </div>
+          <span class="dk-sec-info">U.S. TREASURY YIELD CURVE</span>
+        </div>
+        <div class="dk-info-text" id="info-4">
+          만기별 국채 금리를 이은 곡선입니다. 정상 곡선은 우상향(장기 &gt; 단기) 하지만, 단기 금리가 장기를 추월하는 '역전(inversion)'은 역사적으로 경기침체의 강력한 선행지표였습니다.
+        </div>
+        <div class="dk-card">
+          <svg class="dk-yield-chart" id="dkYieldChart" viewBox="0 0 760 300" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="dk-yield-stats" id="dkYieldStats"></div>
+          <div class="dk-yield-warn" id="dkYieldWarn"></div>
+        </div>
+      </section>
+
+      <div class="dk-div"></div>
+
+      <!-- ===== ⑥(NEW) 하이일드 스프레드 ===== -->
+      <section class="dk-section" id="dk-s4b">
+        <div class="dk-sec-head">
+          <div class="dk-sec-title-wrap">
+            <span class="dk-sec-num">06</span>
+            <span class="dk-sec-title">하이일드 스프레드</span>
+            <span class="dk-info" onclick="dkInfo('info-4b')">?</span>
+          </div>
+          <span class="dk-sec-info">HIGH-YIELD CREDIT SPREAD · FRED</span>
+        </div>
+        <div class="dk-info-text" id="info-4b">
+          신용등급이 낮은 기업(하이일드) 채권 금리와 국채 금리의 차이입니다. 시장에 돈이 마르거나 부도 우려가 커지면 가장 먼저 벌어지는 '신용 시장의 조기경보기'로, 주가 급락에 선행하는 경우가
+          많습니다. 평상시 3~4%, 위기 시 8% 이상으로 치솟습니다.
+        </div>
+        <div class="dk-card">
+          <div class="dk-card-glow"></div>
+          <div class="dk-hy-top">
+            <div>
+              <div
+                style="font-size:12px;color:var(--txt-3);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px;">
+                현재 스프레드</div>
+              <div class="dk-hy-num" id="dkHyNum">0%</div>
+            </div>
+            <div style="text-align:right;">
+              <span class="dk-kimchi-badge" id="dkHyBadge">—</span>
+              <div class="dk-buffett-sub" id="dkHySub" style="margin-top:8px;"></div>
+            </div>
+          </div>
+          <div class="dk-buffett-bar-wrap">
+            <div class="dk-hy-bar">
+              <div class="dk-buffett-historic" style="left:54%;" data-label="'20.3 코로나"></div>
+              <div class="dk-buffett-historic" style="left:99%;" data-label="'08 금융위기"></div>
+              <div class="dk-kp-marker" id="dkHyMarker" style="left:30%;"></div>
+            </div>
+            <div class="dk-hy-zones">
+              <div class="dk-bz-1">안정<span class="dk-bz-pct">&lt; 3%</span></div>
+              <div class="dk-bz-2">보통<span class="dk-bz-pct">3 ~ 5%</span></div>
+              <div class="dk-bz-3">경계<span class="dk-bz-pct">5 ~ 7%</span></div>
+              <div class="dk-bz-4">위기<span class="dk-bz-pct">7% +</span></div>
+            </div>
+          </div>
+          <div class="dk-hy-interp" id="dkHyInterp"></div>
+        </div>
+      </section>
+
+      <div class="dk-div"></div>
+
+      <!-- ===== ⑦ VIX ===== -->
+      <section class="dk-section" id="dk-s5">
+        <div class="dk-sec-head">
+          <div class="dk-sec-title-wrap">
+            <span class="dk-sec-num">07</span>
+            <span class="dk-sec-title">VIX 변동성 지수</span>
+            <span class="dk-info" onclick="dkInfo('info-5')">?</span>
+          </div>
+          <span class="dk-sec-info">S&amp;P500 내재변동성</span>
+        </div>
+        <div class="dk-info-text" id="info-5">
+          VIX는 S&amp;P500 옵션의 향후 30일 기대 변동성을 수치화한 지수로, '월스트리트의 공포지수'라 불립니다. 평상시 15~20, 시장 패닉 시 40 이상으로 치솟습니다.
+        </div>
+        <div class="dk-card dk-vix-card">
+          <div class="dk-card-glow"></div>
+          <div class="dk-gauge-wrap">
+            <svg viewBox="0 0 280 170" width="100%">
+              <path d="M 40 140 A 100 100 0 0 1 240 140" stroke="#1e2740" stroke-width="20" fill="none"
+                stroke-linecap="round" />
+              <path d="M 40 140 A 100 100 0 0 1 240 140" stroke="url(#dkGaugeGrad)" stroke-width="20" fill="none"
+                stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" id="dkVixArc"
+                filter="url(#dkGlow)" opacity="0.35" />
+              <path d="M 40 140 A 100 100 0 0 1 240 140" stroke="url(#dkGaugeGrad)" stroke-width="20" fill="none"
+                stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" id="dkVixArcMain" />
+              <line id="dkVixNeedle" x1="140" y1="140" x2="140" y2="55" stroke="#fff" stroke-width="3.5"
+                stroke-linecap="round" transform="rotate(-90 140 140)" />
+              <circle cx="140" cy="140" r="9" fill="#0a0f1c" stroke="#fff" stroke-width="2.5" />
+              <circle cx="140" cy="140" r="3" fill="#fff" />
+            </svg>
+            <div class="dk-gauge-val">
+              <div class="dk-gauge-num" id="dkVixNum">0</div>
+              <div class="dk-gauge-label" id="dkVixLab" style="color:var(--up)">—</div>
+            </div>
+          </div>
+          <div class="dk-vix-band" id="dkVixBand">
+            <div class="dk-vb-1">안정<span class="dk-vix-band-r">&lt;15</span></div>
+            <div class="dk-vb-2">보통<span class="dk-vix-band-r">15~25</span></div>
+            <div class="dk-vb-3">불안<span class="dk-vix-band-r">25~35</span></div>
+            <div class="dk-vb-4">패닉<span class="dk-vix-band-r">35+</span></div>
+          </div>
+          <div class="dk-vix-explain" id="dkVixExplain"></div>
+        </div>
+      </section>
+
+      <div class="dk-div"></div>
+
+      <!-- ===== ⑥ SECTOR ===== -->
+      <section class="dk-section" id="dk-s6">
+        <div class="dk-sec-head">
+          <div class="dk-sec-title-wrap">
+            <span class="dk-sec-num">08</span>
+            <span class="dk-sec-title">S&amp;P 500 섹터별 성과</span>
+            <span class="dk-info" onclick="dkInfo('info-6')">?</span>
+          </div>
+          <span class="dk-sec-info">SECTOR PERFORMANCE</span>
+        </div>
+        <div class="dk-info-text" id="info-6">
+          11개 산업 섹터의 전일 대비 등락률을 트리맵으로 시각화했습니다. 타일 크기는 S&amp;P 500 내 시가총액 비중을 반영하므로, 큰 타일의 색이 곧 시장 전체의 방향입니다. 자금이 몰리는 섹터와
+          빠지는 섹터를 한눈에 파악해 섹터 로테이션 전략에 활용하세요.
+        </div>
+        <div class="dk-sector-grid" id="dkSectorGrid"></div>
+      </section>
+
+      <div class="dk-div"></div>
+
+      <!-- ===== ⑦ ECON ===== -->
+      <section class="dk-section" id="dk-s7">
+        <div class="dk-sec-head">
+          <div class="dk-sec-title-wrap">
+            <span class="dk-sec-num">09</span>
+            <span class="dk-sec-title">주요 경제 지표</span>
+            <span class="dk-info" onclick="dkInfo('info-7')">?</span>
+          </div>
+          <span class="dk-sec-info">MACRO INDICATORS · US · KR</span>
+        </div>
+        <div class="dk-info-text" id="info-7">
+          기준금리·물가·고용 등 핵심 매크로 지표는 자산 가격 흐름의 근본 배경입니다. 전월 대비 추세까지 함께 보면 정책 변화의 방향을 짐작할 수 있습니다.
+        </div>
+        <div class="dk-econ" id="dkEcon"></div>
+      </section>
+
+      <div class="dk-div"></div>
+
+      <!-- ===== ⑩(NEW) 이번 주 경제 캘린더 ===== -->
+      <section class="dk-section" id="dk-s9">
+        <div class="dk-sec-head">
+          <div class="dk-sec-title-wrap">
+            <span class="dk-sec-num">10</span>
+            <span class="dk-sec-title">다가오는 주요 일정</span>
+            <span class="dk-info" onclick="dkInfo('info-9')">?</span>
+          </div>
+          <span class="dk-sec-info">ECONOMIC CALENDAR · D-DAY</span>
+        </div>
+        <div class="dk-info-text" id="info-9">
+          FOMC, CPI, 고용보고서 등 시장을 크게 움직이는 이벤트 일정입니다. 발표 직전에는 변동성이 커지는 경향이 있으니, 큰 포지션 변경은 이벤트 전후를 피하는 것이 일반적입니다. 점 3개는 시장
+          영향력이 가장 큰 이벤트입니다.
+        </div>
+        <div class="dk-cal" id="dkCal"></div>
+      </section>
+
+      <!-- ===== FOOTER ===== -->
+      <footer class="dk-footer">
+        <div class="dk-disc">
+          📌 본 대시보드의 데이터는 <b>참고용</b>이며, 투자 권유나 종목 추천이 아닙니다. 모든 투자 결정과 그에 따른 손익은 투자자 본인의 책임입니다.
+        </div>
+        <div class="dk-src">데이터 출처: <b>FRED · Yahoo Finance · CNN Business · CoinGecko · Upbit · Alternative.me ·
+            한국은행</b></div>
+        <div class="dk-cycle">업데이트 주기: 매 거래일 아침 (한국시간 기준) · 종합 신호·해석 문구는 수집된 데이터 기반 자동 생성</div>
+      </footer>
+
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // ════════════════════════════════════════════════════════════════
+      //  DK_DATA — 매일 갱신되는 유일한 데이터 영역
+      //  update_dashboard.py 실행 시 아래 블록이 자동으로 교체됩니다.
+      //  (수동 수정 시에도 이 블록의 숫자만 바꾸면 나머지는 전부 자동 계산)
+      // ════════════════════════════════════════════════════════════════
+      /*DK_DATA_START*/
+      const DK_DATA = {
+        "updated": "2026.06.11 21:02 KST",
+        "assets": [
+          {
+            "name": "S&P 500",
+            "icon": "SP",
+            "col": "#4dd0ff",
+            "price": 7266.99,
+            "chg": -1.62,
+            "pre": "",
+            "suf": "",
+            "dec": 2,
+            "spark": [
+              7599.96,
+              7609.78,
+              7553.68,
+              7584.31,
+              7383.74,
+              7405.73,
+              7386.65,
+              7266.99
+            ]
+          },
+          {
+            "name": "나스닥",
+            "icon": "NQ",
+            "col": "#b58cff",
+            "price": 25169.5,
+            "chg": -1.98,
+            "pre": "",
+            "suf": "",
+            "dec": 2,
+            "spark": [
+              27086.81,
+              27093.9,
+              26853.98,
+              26830.96,
+              25709.43,
+              25929.66,
+              25678.82,
+              25169.5
+            ]
+          },
+          {
+            "name": "코스피",
+            "icon": "KS",
+            "col": "#ff7d92",
+            "price": 7763.95,
+            "chg": 0.43,
+            "pre": "",
+            "suf": "",
+            "dec": 2,
+            "spark": [
+              8788.38,
+              8801.49,
+              8639.41,
+              8160.59,
+              7484.41,
+              8096.93,
+              7730.82,
+              7763.95
+            ]
+          },
+          {
+            "name": "비트코인",
+            "icon": "₿",
+            "col": "#ffb84d",
+            "price": 62304,
+            "chg": 2.44,
+            "pre": "$",
+            "suf": "",
+            "dec": 0,
+            "spark": [
+              62729,
+              61083,
+              60794,
+              62679,
+              62220,
+              60791,
+              60821,
+              62304
+            ]
+          },
+          {
+            "name": "금 (Gold)",
+            "icon": "Au",
+            "col": "#ffd966",
+            "price": 4106.3,
+            "chg": -0.05,
+            "pre": "$",
+            "suf": "",
+            "dec": 2,
+            "spark": [
+              4489.1,
+              4436.7,
+              4475.8,
+              4337.1,
+              4335.9,
+              4260.0,
+              4108.2,
+              4106.3
+            ]
+          },
+          {
+            "name": "원/달러",
+            "icon": "₩",
+            "col": "#00ffa3",
+            "price": 1522.51,
+            "chg": 0.0,
+            "pre": "",
+            "suf": " ₩",
+            "dec": 2,
+            "spark": [
+              1522.51,
+              1522.51,
+              1522.51,
+              1522.51,
+              1522.51,
+              1522.51,
+              1522.51,
+              1522.51
+            ]
+          },
+          {
+            "name": "달러인덱스",
+            "icon": "DX",
+            "col": "#9aa5c4",
+            "price": 100.06,
+            "chg": 0.11,
+            "pre": "",
+            "suf": "",
+            "dec": 2,
+            "spark": [
+              99.22,
+              99.53,
+              99.41,
+              100.07,
+              100.05,
+              99.91,
+              99.95,
+              100.06
+            ]
+          },
+          {
+            "name": "WTI 유가",
+            "icon": "OIL",
+            "col": "#7c5cff",
+            "price": 95.0,
+            "chg": 0.72,
+            "pre": "$",
+            "suf": "",
+            "dec": 2,
+            "spark": [
+              92.65,
+              91.16,
+              95.96,
+              97.47,
+              99.76,
+              96.83,
+              94.32,
+              95.0
+            ]
+          }
+        ],
+        "fg": {
+          "stock": {
+            "now": 27,
+            "prev": 27,
+            "w1": 54,
+            "m1": 67,
+            "y1": 64
+          },
+          "crypto": {
+            "now": 12,
+            "prev": 9,
+            "w1": 12,
+            "m1": 49,
+            "y1": 72
+          }
+        },
+        "buffett": {
+          "now": 214,
+          "prev": 214
+        },
+        "vix": {
+          "now": 19.9,
+          "prev": 18.9
+        },
+        "yields": {
+          "labels": [
+            "1M",
+            "3M",
+            "6M",
+            "1Y",
+            "2Y",
+            "5Y",
+            "10Y",
+            "30Y"
+          ],
+          "today": [
+            3.69,
+            3.79,
+            3.82,
+            3.9,
+            4.13,
+            4.26,
+            4.53,
+            5.01
+          ],
+          "m1": [
+            3.71,
+            3.69,
+            3.74,
+            3.75,
+            3.9,
+            4.02,
+            4.38,
+            4.95
+          ]
+        },
+        "hy": {
+          "now": 2.78,
+          "prev": 2.75,
+          "m1": 2.82
+        },
+        "kimchi": {
+          "upbit": 94881000,
+          "btc_usd": 62304,
+          "usdkrw": 1522.51,
+          "prev": 0.0
+        },
+        "sectors": [
+          {
+            "name": "기술 (Tech)",
+            "pct": -2.29,
+            "w": 32
+          },
+          {
+            "name": "금융",
+            "pct": -0.44,
+            "w": 13
+          },
+          {
+            "name": "헬스케어",
+            "pct": -1.11,
+            "w": 11
+          },
+          {
+            "name": "임의소비재",
+            "pct": -2.05,
+            "w": 10
+          },
+          {
+            "name": "통신 서비스",
+            "pct": -0.42,
+            "w": 9
+          },
+          {
+            "name": "산업재",
+            "pct": -3.38,
+            "w": 8
+          },
+          {
+            "name": "필수소비재",
+            "pct": 1.65,
+            "w": 6
+          },
+          {
+            "name": "에너지",
+            "pct": 1.5,
+            "w": 3.5
+          },
+          {
+            "name": "유틸리티",
+            "pct": 0.05,
+            "w": 2.5
+          },
+          {
+            "name": "부동산",
+            "pct": 0.04,
+            "w": 2
+          },
+          {
+            "name": "소재",
+            "pct": -2.3,
+            "w": 2
+          }
+        ],
+        "econ": [
+          {
+            "flag": "US",
+            "name": "기준금리",
+            "val": "3.5",
+            "suf": "%",
+            "delta": "— 동결",
+            "tone": "flat",
+            "cat": "통화정책"
+          },
+          {
+            "flag": "US",
+            "name": "소비자물가 (CPI)",
+            "val": "2.6",
+            "suf": "%",
+            "delta": "▲ +0.1%p",
+            "tone": "bad",
+            "cat": "인플레이션"
+          },
+          {
+            "flag": "US",
+            "name": "실업률",
+            "val": "4.3",
+            "suf": "%",
+            "delta": "— 보합",
+            "tone": "flat",
+            "cat": "고용"
+          },
+          {
+            "flag": "US",
+            "name": "연준 대차대조표",
+            "val": "$6.7",
+            "suf": "조",
+            "delta": "▲ +0.01조",
+            "tone": "bad",
+            "cat": "유동성"
+          },
+          {
+            "flag": "KR",
+            "name": "기준금리",
+            "val": "1.00",
+            "suf": "%",
+            "delta": "▼ -0.25%p",
+            "tone": "good",
+            "cat": "통화정책"
+          },
+          {
+            "flag": "KR",
+            "name": "소비자물가 (CPI)",
+            "val": "3.1",
+            "suf": "%",
+            "delta": "▲ +0.6%p",
+            "tone": "bad",
+            "cat": "인플레이션"
+          }
+        ],
+        "calendar": [
+          {
+            "date": "2026-07-03",
+            "name": "미국 고용보고서 (NFP)",
+            "sub": "비농업 고용·실업률 발표",
+            "cat": "US",
+            "imp": 3
+          },
+          {
+            "date": "2026-08-07",
+            "name": "미국 고용보고서 (NFP)",
+            "sub": "비농업 고용·실업률 발표",
+            "cat": "US",
+            "imp": 3
+          },
+          {
+            "date": "2027-01-25",
+            "name": "FOMC 회의 1일차",
+            "sub": "미국 연준 통화정책회의",
+            "cat": "US",
+            "imp": 3
+          },
+          {
+            "date": "2027-01-26",
+            "name": "FOMC 기준금리 발표",
+            "sub": "한국시간 다음날 새벽 3시",
+            "cat": "US",
+            "imp": 3
+          }
+        ]
+      };
+      /*DK_DATA_END*/
+
+      // ============ 공통 헬퍼 ============
+      const $ = id => document.getElementById(id);
+      function fmt(n, dec) { dec = dec === undefined ? 2 : dec; return n.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }); }
+      function animateNum(el, target, duration, formatter) {
+        if (!el) return;
+        const start = performance.now();
+        function step(now) {
+          const t = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - t, 3);
+          const v = target * eased;
+          el.textContent = formatter ? formatter(v) : Math.round(v);
+          if (t < 1) requestAnimationFrame(step);
+          else el.textContent = formatter ? formatter(target) : target;
+        }
+        requestAnimationFrame(step);
+      }
+      const clamp01 = v => Math.max(0, Math.min(1, v));
+      const asset = name => DK_DATA.assets.find(a => a.name === name);
+
+      // 데이터 기준 시각
+      if ($('dkTime')) $('dkTime').textContent = DK_DATA.updated;
+
+      // ============ 파생값 계산 ============
+      const Y = DK_DATA.yields;
+      const iOf = l => Y.labels.indexOf(l);
+      const s2s10 = +(Y.today[iOf('10Y')] - Y.today[iOf('2Y')]).toFixed(2);
+      const s3m10 = +(Y.today[iOf('10Y')] - Y.today[iOf('3M')]).toFixed(2);
+      const K = DK_DATA.kimchi;
+      const globalKrw = K.btc_usd * K.usdkrw;
+      const kimchiPct = +((K.upbit / globalKrw - 1) * 100).toFixed(2);
+
+      // ============ 구간 분류기 ============
+      function fgZone(v) {
+        if (v < 25) return { name: '극공포', en: 'EXTREME FEAR', col: 'var(--down)', idx: 0 };
+        if (v < 45) return { name: '공포', en: 'FEAR', col: 'var(--warn)', idx: 1 };
+        if (v < 56) return { name: '중립', en: 'NEUTRAL', col: 'var(--txt-1)', idx: 2 };
+        if (v < 75) return { name: '탐욕', en: 'GREED', col: 'var(--up)', idx: 3 };
+        return { name: '극탐욕', en: 'EXTREME GREED', col: 'var(--accent)', idx: 4 };
+      }
+      function vixZone(v) {
+        if (v < 15) return { name: '안정 STABLE', col: 'var(--up)', idx: 0 };
+        if (v < 25) return { name: '보통 NORMAL', col: 'var(--txt-1)', idx: 1 };
+        if (v < 35) return { name: '불안 ELEVATED', col: 'var(--warn)', idx: 2 };
+        return { name: '패닉 PANIC', col: 'var(--down)', idx: 3 };
+      }
+      function buffettZone(v) {
+        if (v < 75) return { name: '저평가', col: 'var(--up)' };
+        if (v < 115) return { name: '적정 수준', col: 'var(--accent)' };
+        if (v < 150) return { name: '고평가', col: 'var(--warn)' };
+        if (v < 200) return { name: '버블 경계', col: 'var(--down)' };
+        return { name: '⚠ 버블 영역', col: 'var(--down)' };
+      }
+      function hyZone(v) {
+        if (v < 3) return { name: '안정', col: 'var(--up)' };
+        if (v < 5) return { name: '보통', col: 'var(--accent)' };
+        if (v < 7) return { name: '경계', col: 'var(--warn)' };
+        return { name: '위기', col: 'var(--down)' };
+      }
+      function kimchiZone(p) {
+        if (p < 0) return { name: '역프리미엄 — 심리 냉각', col: '#4dd0ff' };
+        if (p < 2) return { name: '정상 범위', col: 'var(--up)' };
+        if (p < 5) return { name: '과열 조짐', col: 'var(--gold)' };
+        if (p < 10) return { name: '과열', col: 'var(--warn)' };
+        return { name: '극단적 과열', col: 'var(--down)' };
+      }
+
+      // ============ 종합 시장 점수 (0~100, 높을수록 위험선호 우호) ============
+      function computeScore() {
+        const fg = DK_DATA.fg.stock.now;
+        const vix = DK_DATA.vix.now;
+        const bf = DK_DATA.buffett.now;
+        const hy = DK_DATA.hy.now;
+        const breadth = DK_DATA.sectors.filter(s => s.pct >= 0).length / DK_DATA.sectors.length;
+        const comps = [
+          { name: '시장 심리', score: fg, w: 0.22 },
+          { name: '변동성(VIX)', score: clamp01((35 - vix) / 23) * 100, w: 0.18 },
+          { name: '밸류에이션', score: clamp01((250 - bf) / 130) * 100, w: 0.22 },
+          { name: '금리 곡선', score: clamp01((s2s10 + 0.5) / 1.5) * 100, w: 0.13 },
+          { name: '신용 시장', score: clamp01((8 - hy) / 5.5) * 100, w: 0.12 },
+          { name: '섹터 온기', score: breadth * 100, w: 0.13 }
+        ];
+        const score = Math.round(comps.reduce((s, c) => s + c.score * c.w, 0));
+        return { score, comps };
+      }
+      function scoreVerdict(s) {
+        if (s < 40) return { label: '위험 신호 — 방어 우선', col: 'var(--down)', light: 'r', word: '적신호' };
+        if (s < 60) return { label: '중립 — 선별적 관망', col: 'var(--warn)', light: 'y', word: '황색 신호' };
+        return { label: '양호 — 위험선호 우호', col: 'var(--up)', light: 'g', word: '청신호' };
+      }
+      const SIG = computeScore();
+      const VERDICT = scoreVerdict(SIG.score);
+
+      // ============ 헤더 STATUS ROW ============
+      function renderStatus() {
+        const fz = fgZone(DK_DATA.fg.stock.now);
+        const vz = vixZone(DK_DATA.vix.now);
+        const bz = buffettZone(DK_DATA.buffett.now);
+        const kz = kimchiZone(kimchiPct);
+        const items = [
+          { l: '종합 신호', v: SIG.score + '점', vc: VERDICT.col, sub: VERDICT.word },
+          { l: '시장 심리', v: fz.name + ' (' + DK_DATA.fg.stock.now + ')', vc: '', sub: '전일 대비 ' + (DK_DATA.fg.stock.now - DK_DATA.fg.stock.prev >= 0 ? '+' : '') + (DK_DATA.fg.stock.now - DK_DATA.fg.stock.prev) },
+          { l: '버핏 지표', v: DK_DATA.buffett.now + '%', vc: bz.col, sub: bz.name },
+          { l: 'VIX', v: fmt(DK_DATA.vix.now, 1), vc: vz.col, sub: '전일 ' + fmt(DK_DATA.vix.prev, 1) },
+          { l: '10년물 금리', v: fmt(Y.today[iOf('10Y')], 2) + '%', vc: '', sub: '2Y-10Y ' + (s2s10 >= 0 ? '+' : '') + fmt(s2s10, 2) + '%p' },
+          { l: '김치 프리미엄', v: (kimchiPct >= 0 ? '+' : '') + fmt(kimchiPct, 2) + '%', vc: kz.col, sub: kz.name }
+        ];
+        $('dkStatusRow').innerHTML = items.map(it =>
+          '<div class="dk-stat"><div class="dk-stat-l">' + it.l + '</div>' +
+          '<div class="dk-stat-v"' + (it.vc ? ' style="color:' + it.vc + ';"' : '') + '>' + it.v + '</div>' +
+          '<div class="dk-stat-sub">' + it.sub + '</div></div>'
+        ).join('');
+      }
+      renderStatus();
+
+      // ============ 종합 신호등 히어로 ============
+      function renderSignal() {
+        $('dkSignal').style.setProperty('--sig-col', VERDICT.col);
+        $('dkLight' + VERDICT.light.toUpperCase()).classList.add('on');
+        animateNum($('dkSigScore'), SIG.score, 1500);
+        const vd = $('dkSigVerdict');
+        vd.textContent = VERDICT.label;
+        vd.style.color = VERDICT.col;
+        setTimeout(() => { $('dkSigMarker').style.left = SIG.score + '%'; }, 300);
+
+        // 컴포넌트 칩
+        $('dkSigChips').innerHTML = SIG.comps.map(c => {
+          const col = c.score < 40 ? 'var(--down)' : c.score < 60 ? 'var(--warn)' : 'var(--up)';
+          return '<span class="dk-sig-chip"><span class="dot" style="background:' + col + ';box-shadow:0 0 8px ' + col + ';"></span>' +
+            c.name + ' <span class="dk-mono" style="color:' + col + ';">' + Math.round(c.score) + '</span></span>';
+        }).join('');
+
+        // 자동 생성 헤드라인 & 본문
+        const sp = asset('S&P 500'), nq = asset('나스닥'), ks = asset('코스피'), fx = asset('원/달러'), btc = asset('비트코인');
+        const bigUs = Math.abs(nq.chg) > Math.abs(sp.chg) ? nq : sp;
+        const usTxt = bigUs.name + ' ' + (bigUs.chg >= 0 ? '+' : '') + bigUs.chg.toFixed(1) + '%';
+        const krTxt = '코스피 ' + (ks.chg >= 0 ? '+' : '') + ks.chg.toFixed(1) + '%';
+        $('dkSentTitle').innerHTML = usTxt + ' · ' + krTxt + ' — <span style="color:' + VERDICT.col + ';">' + VERDICT.word + ' (' + SIG.score + '점)</span>';
+
+        const fz = fgZone(DK_DATA.fg.stock.now);
+        const bz = buffettZone(DK_DATA.buffett.now);
+        const vz = vixZone(DK_DATA.vix.now);
+        let body = '';
+        body += '미국은 <b>S&amp;P 500 ' + (sp.chg >= 0 ? '+' : '') + sp.chg.toFixed(2) + '%</b>, <b>나스닥 ' + (nq.chg >= 0 ? '+' : '') + nq.chg.toFixed(2) + '%</b>' + (bigUs.chg <= -2 ? '로 큰 폭 하락' : bigUs.chg >= 2 ? '로 강세' : '') + '. ';
+        body += '코스피는 <b>' + fmt(ks.price, 0) + ' (' + (ks.chg >= 0 ? '+' : '') + ks.chg.toFixed(2) + '%)</b>' + (ks.chg * bigUs.chg < 0 ? '로 차별화 흐름' : '') + ', 원/달러 <b>' + fmt(fx.price, 0) + '원</b>. ';
+        body += '비트코인 <b>$' + fmt(btc.price, 0) + '</b>에 김프 <b>' + (kimchiPct >= 0 ? '+' : '') + kimchiPct.toFixed(1) + '%</b>. ';
+        body += '심리는 <b>' + fz.name + '(' + DK_DATA.fg.stock.now + ')</b>, VIX <b>' + DK_DATA.vix.now + '(' + vz.name.split(' ')[0] + ')</b>, 버핏 지표 <b>' + DK_DATA.buffett.now + '%(' + bz.name.replace('⚠ ', '') + ')</b>. ';
+        body += SIG.score < 40 ? '여러 지표에 경고등이 켜진 만큼 <b>현금 비중 확보·방어적 운용</b>이 무난합니다.'
+          : SIG.score < 60 ? '신호가 엇갈리는 구간입니다. 추격매수보다 <b>분할 매수·종목 선별</b>이 무난합니다.'
+            : '전반적으로 우호적인 환경이지만 <b>밸류에이션 부담은 항상 점검</b>하세요.';
+        $('dkSentBody').innerHTML = body;
+      }
+      renderSignal();
+
+      // ============ 어제와 달라진 점 ============
+      function renderChanged() {
+        const items = [];
+        const fgD = DK_DATA.fg.stock.now - DK_DATA.fg.stock.prev;
+        if (fgD !== 0) items.push({ i: fgD > 0 ? '🌡️' : '🧊', t: '공포·탐욕 <b>' + DK_DATA.fg.stock.prev + ' → ' + DK_DATA.fg.stock.now + '</b> (' + (fgD > 0 ? '+' : '') + fgD + ') ' + (fgD > 0 ? '심리 회복' : '심리 위축') });
+        const vixD = +(DK_DATA.vix.now - DK_DATA.vix.prev).toFixed(1);
+        if (Math.abs(vixD) >= 0.3) items.push({ i: vixD < 0 ? '😌' : '⚡', t: 'VIX <b>' + DK_DATA.vix.prev + ' → ' + DK_DATA.vix.now + '</b> ' + (vixD < 0 ? '변동성 진정' : '변동성 확대') });
+        const bfD = DK_DATA.buffett.now - DK_DATA.buffett.prev;
+        if (Math.abs(bfD) >= 1) items.push({ i: '📏', t: '버핏 지표 <b>' + DK_DATA.buffett.prev + '% → ' + DK_DATA.buffett.now + '%</b>' });
+        const kpD = +(kimchiPct - K.prev).toFixed(2);
+        if (Math.abs(kpD) >= 0.2) items.push({ i: '🇰🇷', t: '김프 <b>' + (K.prev >= 0 ? '+' : '') + K.prev.toFixed(1) + '% → ' + (kimchiPct >= 0 ? '+' : '') + kimchiPct.toFixed(1) + '%</b> ' + (kpD > 0 ? '국내 열기 확대' : '국내 열기 진정') });
+        const hyD = +(DK_DATA.hy.now - DK_DATA.hy.prev).toFixed(2);
+        if (Math.abs(hyD) >= 0.03) items.push({ i: hyD > 0 ? '🚨' : '💳', t: '하이일드 스프레드 <b>' + DK_DATA.hy.prev + '% → ' + DK_DATA.hy.now + '%</b> ' + (hyD > 0 ? '신용 경계감 상승' : '신용 여건 개선') });
+        const mover = DK_DATA.assets.slice().sort((a, b) => Math.abs(b.chg) - Math.abs(a.chg))[0];
+        items.push({ i: mover.chg >= 0 ? '🚀' : '📉', t: '오늘 최대 변동: <b>' + mover.name + ' ' + (mover.chg >= 0 ? '+' : '') + mover.chg.toFixed(2) + '%</b>' });
+        $('dkChangedList').innerHTML = items.slice(0, 6).map(it =>
+          '<div class="dk-changed-item"><span class="ci">' + it.i + '</span><span>' + it.t + '</span></div>'
+        ).join('');
+      }
+      renderChanged();
+
+      // ============ SPARKLINE ============
+      function makeSpark(values, color, w, h) {
+        w = w || 160; h = h || 36;
+        const min = Math.min.apply(null, values);
+        const max = Math.max.apply(null, values);
+        const range = max - min || 1;
+        const stepX = w / (values.length - 1);
+        let d = '', hiX = 0, hiY = 0, loX = 0, loY = 0;
+        values.forEach((v, i) => {
+          const x = i * stepX;
+          const y = h - ((v - min) / range) * (h - 8) - 4;
+          if (v === max) { hiX = x; hiY = y; }
+          if (v === min) { loX = x; loY = y; }
+          d += (i === 0 ? 'M' : ' L') + ' ' + x.toFixed(1) + ' ' + y.toFixed(1);
+        });
+        const areaD = d + ' L ' + w + ' ' + h + ' L 0 ' + h + ' Z';
+        const gid = 'sp_' + Math.random().toString(36).slice(2, 8);
+        return '<svg class="dk-spark" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none">' +
+          '<defs><linearGradient id="' + gid + '" x1="0%" y1="0%" x2="0%" y2="100%">' +
+          '<stop offset="0%" stop-color="' + color + '" stop-opacity="0.35"/>' +
+          '<stop offset="100%" stop-color="' + color + '" stop-opacity="0"/></linearGradient></defs>' +
+          '<path d="' + areaD + '" fill="url(#' + gid + ')"/>' +
+          '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 4px ' + color + '80);"/>' +
+          '<circle cx="' + hiX + '" cy="' + hiY + '" r="2.4" fill="#00ffa3"/>' +
+          '<circle cx="' + loX + '" cy="' + loY + '" r="2.4" fill="#ff5871"/>' +
+          '</svg>';
+      }
+
+      // ============ ASSETS ============
+      function renderAssets() {
+        const grid = $('dkAssetGrid');
+        DK_DATA.assets.forEach((a, i) => {
+          const isUp = a.chg >= 0;
+          const sign = isUp ? '+' : '';
+          const arrow = isUp ? '▲' : '▼';
+          const cls = isUp ? 'dk-chg-up' : 'dk-chg-down';
+          const color = isUp ? '#00ffa3' : '#ff5871';
+          const pre = a.pre || '', suf = a.suf || '';
+          const dec = a.dec === undefined ? 2 : a.dec;
+          const card = document.createElement('div');
+          card.className = 'dk-asset';
+          card.innerHTML =
+            '<div class="dk-asset-head">' +
+            '<div class="dk-asset-name">' +
+            '<span class="dk-asset-icon" style="background:' + a.col + '22;color:' + a.col + ';">' + a.icon + '</span>' +
+            a.name +
+            '</div>' +
+            '<div class="dk-asset-mini-chg ' + cls + '">' + arrow + ' ' + sign + a.chg.toFixed(2) + '%</div>' +
+            '</div>' +
+            '<div class="dk-asset-price dk-mono">' + pre + '0' + suf + '</div>' +
+            makeSpark(a.spark, color) +
+            '<div class="dk-asset-meta"><span>7D ·<span style="color:#00ffa3;"> ●</span>고점<span style="color:#ff5871;"> ●</span>저점</span><span>' + (isUp ? '상승' : '하락') + ' 추세</span></div>';
+          grid.appendChild(card);
+          const priceEl = card.querySelector('.dk-asset-price');
+          setTimeout(() => animateNum(priceEl, a.price, 1200, v => pre + fmt(v, dec) + suf), 80 + i * 60);
+        });
+      }
+      renderAssets();
+
+      // ============ TICKER ============
+      function renderTicker() {
+        const m = $('dkMarquee');
+        const items = DK_DATA.assets.concat(DK_DATA.assets).map(a => {
+          const isUp = a.chg >= 0;
+          const cls = isUp ? 'dk-chg-up' : 'dk-chg-down';
+          const sign = isUp ? '+' : '';
+          const arrow = isUp ? '▲' : '▼';
+          const pre = a.pre || '', suf = a.suf || '';
+          const dec = a.dec === undefined ? 2 : a.dec;
+          return '<div class="dk-tick-item">' +
+            '<span class="dk-tick-name">' + a.name + '</span>' +
+            '<span class="dk-tick-price dk-mono">' + pre + fmt(a.price, dec) + suf + '</span>' +
+            '<span class="dk-tick-chg dk-mono ' + cls + '">' + arrow + ' ' + sign + a.chg.toFixed(2) + '%</span>' +
+            '</div>';
+        }).join('');
+        m.innerHTML = items;
+      }
+      renderTicker();
+
+      // ============ 김치 프리미엄 ============
+      function renderKimchi() {
+        const kz = kimchiZone(kimchiPct);
+        const numEl = $('dkKpNum');
+        numEl.style.color = kz.col;
+        numEl.style.textShadow = '0 0 30px ' + kz.col.replace(')', ',0.35)').replace('var(--', 'rgba(255,255,255,');
+        animateNum(numEl, kimchiPct, 1400, v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%');
+        const badge = $('dkKpBadge');
+        badge.textContent = kz.name;
+        badge.style.color = kz.col;
+        badge.style.borderColor = kz.col;
+        // 스케일 -2 ~ +10 (비선형 아님, 단순 선형 매핑)
+        const pos = clamp01((kimchiPct + 2) / 12) * 100;
+        setTimeout(() => { $('dkKpMarker').style.left = Math.max(2, Math.min(98, pos)) + '%'; }, 300);
+        $('dkKpRows').innerHTML =
+          '<div class="dk-kimchi-row"><span>업비트 BTC</span><span class="v">₩' + fmt(K.upbit, 0) + '</span></div>' +
+          '<div class="dk-kimchi-row"><span>글로벌 BTC (USD×환율)</span><span class="v">₩' + fmt(Math.round(globalKrw), 0) + '</span></div>' +
+          '<div class="dk-kimchi-row"><span>BTC 글로벌 시세</span><span class="v">$' + fmt(K.btc_usd, 0) + '</span></div>' +
+          '<div class="dk-kimchi-row"><span>원/달러 환율</span><span class="v">' + fmt(K.usdkrw, 2) + '원</span></div>';
+        let t = '';
+        if (kimchiPct < 0) t = '국내 가격이 글로벌보다 싼 <b>역프리미엄</b> 상태입니다. 역사적으로 역프는 국내 투자심리가 극도로 위축된 구간에서 나타났으며, 역발상 관점에서 주목하는 투자자도 있습니다.';
+        else if (kimchiPct < 2) t = '김프 <b>' + kimchiPct.toFixed(1) + '%</b>는 정상 범위입니다. 국내외 가격 차이가 크지 않아 차익거래 유인도, 과열 신호도 약한 평온한 상태입니다.';
+        else if (kimchiPct < 5) t = '김프 <b>' + kimchiPct.toFixed(1) + '%</b>로 국내 매수 열기가 다소 높아졌습니다. 과거 김프 5% 이상 구간에서 단기 고점이 형성된 사례가 많아 추격매수는 주의가 필요합니다.';
+        else t = '김프 <b>' + kimchiPct.toFixed(1) + '%</b>는 명백한 과열 신호입니다. 2018년 초 김프 50%, 2021년 20% 구간 직후 큰 조정이 왔다는 점을 기억하세요.';
+        $('dkKpInterp').innerHTML = t + ' <span style="color:var(--txt-3);">(전일 ' + (K.prev >= 0 ? '+' : '') + K.prev.toFixed(1) + '%)</span>';
+      }
+      renderKimchi();
+
+      // ============ GAUGES ============
+      function primeNeedle(el) {
+        if (!el) return;
+        el.removeAttribute('transform');
+        el.style.transformOrigin = '140px 140px';
+        el.style.transformBox = 'view-box';
+        el.style.transform = 'rotate(-90deg)';
+      }
+      function rotateNeedle(el, angle) {
+        if (!el) return;
+        el.style.transition = 'transform 1.6s cubic-bezier(0.16, 1, 0.3, 1)';
+        el.style.transform = 'rotate(' + angle + 'deg)';
+      }
+      function setGauge(arcId, arcMainId, needleId, numId, value, max, decimals) {
+        max = max || 100; decimals = decimals || 0;
+        const arc = $(arcId), arcMain = $(arcMainId), needle = $(needleId);
+        const needleS = $(needleId + 'S');
+        const num = $(numId);
+        const len = 314;
+        const target = (1 - Math.min(value, max) / max) * len;
+        const angle = -90 + (Math.min(value, max) / max) * 180;
+        primeNeedle(needle);
+        primeNeedle(needleS);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              if (arc) { arc.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(0.16, 1, 0.3, 1)'; arc.style.strokeDashoffset = target; }
+              if (arcMain) { arcMain.style.transition = 'stroke-dashoffset 1.6s cubic-bezier(0.16, 1, 0.3, 1)'; arcMain.style.strokeDashoffset = target; }
+              rotateNeedle(needle, angle);
+              rotateNeedle(needleS, angle);
+              animateNum(num, value, 1500, v => decimals ? v.toFixed(decimals) : Math.round(v));
+            }, 250);
+          });
+        });
+      }
+
+      // ============ 공포·탐욕 ============
+      function renderFg(key, gaugeIds, labId, zonesId, trendId, interpId, interpFn) {
+        const d = DK_DATA.fg[key];
+        const z = fgZone(d.now);
+        setGauge.apply(null, gaugeIds.concat([d.now]));
+        const lab = $(labId);
+        lab.textContent = z.name + ' ' + z.en;
+        lab.style.color = z.col;
+        const spans = $(zonesId).querySelectorAll('span');
+        spans.forEach((s, i) => s.classList.toggle('dk-zone-on', i === z.idx));
+        const rows = [['전일', d.prev], ['1주 전', d.w1], ['1개월 전', d.m1], ['1년 전', d.y1]];
+        $(trendId).innerHTML = rows.map(r => {
+          const rz = fgZone(r[1]);
+          return '<div><div class="dk-tl">' + r[0] + '</div><div class="dk-tv" style="color:' + rz.col + ';">' + r[1] + '</div></div>';
+        }).join('');
+        $(interpId).innerHTML = interpFn(d, z);
+      }
+      renderFg('stock', ['dkG1Arc', 'dkG1ArcMain', 'dkG1Needle', 'dkFgNum1'], 'dkFgLab1', 'dkZones1', 'dkFgTrend1', 'dkFgInterp1', (d, z) => {
+        const dir = d.now - d.prev;
+        if (z.idx <= 1) return '심리가 <b>' + z.name + '</b> 구간입니다. 역발상 관점에서 분할 매수를 검토할 수 있는 구간이지만, 하락 추세 확인이 먼저입니다.';
+        if (z.idx === 2) return '심리가 중립 구간에서 ' + (dir >= 0 ? '회복' : '냉각') + ' 중입니다. 방향성이 정해지지 않은 관망 구간 — 추격매수보다 관찰을 권장.';
+        return '심리가 <b>' + z.name + '</b> 구간입니다. "남들이 탐욕스러울 때 두려워하라" — 신규 매수는 신중하게, 분할 접근이 무난합니다.';
+      });
+      renderFg('crypto', ['dkG2Arc', 'dkG2ArcMain', 'dkG2Needle', 'dkFgNum2'], 'dkFgLab2', 'dkZones2', 'dkFgTrend2', 'dkFgInterp2', (d, z) => {
+        const btc = asset('비트코인');
+        const t = 'BTC <b>$' + fmt(btc.price, 0) + '</b> · 심리 <b>' + z.name + '</b>. ';
+        if (z.idx <= 1) return t + '공포 구간은 역사적으로 BTC 저점 매집 구간과 겹치는 경우가 많았습니다.';
+        if (z.idx === 2) return t + '과열은 식었으나 방향성은 아직 불투명합니다.';
+        return t + '탐욕 구간 — 단기 과열 가능성에 유의하세요. 김프 지표를 함께 확인하면 좋습니다.';
+      });
+
+      // ============ VIX ============
+      (function renderVix() {
+        const v = DK_DATA.vix.now;
+        const z = vixZone(v);
+        setGauge('dkVixArc', 'dkVixArcMain', 'dkVixNeedle', 'dkVixNum', v, 50, 1);
+        const lab = $('dkVixLab');
+        lab.textContent = z.name;
+        lab.style.color = z.col;
+        const bands = $('dkVixBand').children;
+        Array.prototype.forEach.call(bands, (b, i) => b.classList.toggle('dk-vb-active', i === z.idx));
+        const d = +(v - DK_DATA.vix.prev).toFixed(1);
+        let t = '현재 VIX는 <b>' + v + '</b>' + (d <= -0.3 ? '로 전일(' + DK_DATA.vix.prev + ') 대비 진정세입니다.' : d >= 0.3 ? '로 전일(' + DK_DATA.vix.prev + ') 대비 상승했습니다.' : '로 전일과 비슷한 수준입니다.') + ' ';
+        if (z.idx === 0) t += '매우 낮은 VIX는 시장의 방심을 뜻하기도 합니다. 낮은 변동성 구간에서의 갑작스러운 급등이 가장 위험한 신호입니다.';
+        else if (z.idx === 1) t += '역사 평균(약 19) 부근의 보통 수준입니다. 헤지 비용이 저렴한 시기로, 포트폴리오 점검에 적절한 구간입니다.';
+        else if (z.idx === 2) t += '불안 구간입니다. 단기 변동성 확대에 대비해 레버리지 축소를 고려할 만합니다.';
+        else t += '패닉 구간입니다. 역설적으로 VIX 40 이상은 역사적으로 중장기 저점 부근이었던 경우가 많습니다.';
+        $('dkVixExplain').innerHTML = t;
+      })();
+
+      // ============ 버핏 지표 ============
+      (function renderBuffett() {
+        const val = DK_DATA.buffett.now;
+        const z = buffettZone(val);
+        const pos = Math.min(96, (val / 250) * 100);
+        setTimeout(() => {
+          const mk = $('dkBuffettMarker');
+          if (mk) mk.style.left = pos + '%';
+          animateNum($('dkBuffettVal'), val, 1500, v => Math.round(v));
+        }, 350);
+        const badge = $('dkBuffettBadge');
+        badge.textContent = z.name;
+        badge.style.color = z.col;
+        badge.style.borderColor = z.col;
+        $('dkBuffettSub').innerHTML = val >= 200 ? '1929 대공황 · 2000 닷컴 · 2021 이후 <b>역사상 최상위권 수준</b>' : val >= 150 ? '2000년 닷컴버블 당시(약 140%)를 넘어선 수준' : val >= 115 ? '역사 평균(약 85%)을 상회하는 고평가 영역' : '역사 평균(약 85%) 부근의 합리적 수준';
+        let t = '<b>역사 평균 85% 대비 현재 ' + val + '%</b>';
+        if (val >= 200) t += '로 극단적 고평가 영역입니다. 과거 동일 수준에서 평균 30~50% 조정이 발생했으나 시점 예측은 불가능합니다. <b>분할 매수·현금 비중 확대</b> 전략을 고려해보세요.';
+        else if (val >= 150) t += '로 버블 경계 영역입니다. 빅테크의 글로벌 매출 구조로 과거보다 높게 나오는 경향은 있으나, 신규 자금 투입은 신중할 때입니다.';
+        else if (val >= 115) t += '로 고평가 영역입니다. 시장 전체보다는 저평가 섹터·종목 선별이 유리한 구간입니다.';
+        else t += '로 합리적 밸류에이션 구간입니다.';
+        $('dkBuffettInterp').innerHTML = t;
+      })();
+
+      // ============ 수익률 곡선 (이번 달 + 1개월 전 고스트) ============
+      function renderYield() {
+        const svg = $('dkYieldChart');
+        const W = 760, H = 300;
+        const padL = 56, padR = 30, padT = 36, padB = 50;
+        const iw = W - padL - padR, ih = H - padT - padB;
+        const all = Y.today.concat(Y.m1);
+        const minY = Math.floor((Math.min.apply(null, all) - 0.12) * 10) / 10;
+        const maxY = Math.ceil((Math.max.apply(null, all) + 0.12) * 10) / 10;
+        const xStep = iw / (Y.labels.length - 1);
+        const yScale = v => padT + (1 - (v - minY) / (maxY - minY)) * ih;
+
+        let h = '';
+        h += '<defs>' +
+          '<linearGradient id="dkYA" x1="0%" y1="0%" x2="0%" y2="100%">' +
+          '<stop offset="0%" stop-color="#00e5ff" stop-opacity="0.35"/>' +
+          '<stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>' +
+          '</linearGradient>' +
+          '<linearGradient id="dkYL" x1="0%" y1="0%" x2="100%" y2="0%">' +
+          '<stop offset="0%" stop-color="#00e5ff"/>' +
+          '<stop offset="100%" stop-color="#7c5cff"/>' +
+          '</linearGradient>' +
+          '</defs>';
+
+        // grid + y labels
+        const gStep = (maxY - minY) / 4;
+        for (let gi = 0; gi <= 4; gi++) {
+          const v = minY + gStep * gi;
+          const y = yScale(v);
+          h += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="2 4"/>';
+          h += '<text x="' + (padL - 10) + '" y="' + (y + 4) + '" fill="#6b7796" font-size="11" font-family="JetBrains Mono" text-anchor="end" font-weight="500">' + v.toFixed(2) + '%</text>';
+        }
+        // x labels
+        Y.labels.forEach((l, i) => {
+          const x = padL + xStep * i;
+          h += '<text x="' + x + '" y="' + (H - padB + 24) + '" fill="#9aa5c4" font-size="11" font-family="JetBrains Mono" text-anchor="middle" font-weight="600">' + l + '</text>';
+        });
+
+        // ghost line (1개월 전)
+        let ghostD = '';
+        Y.m1.forEach((v, i) => {
+          ghostD += (i === 0 ? 'M' : ' L') + ' ' + (padL + xStep * i).toFixed(1) + ' ' + yScale(v).toFixed(1);
+        });
+        h += '<path d="' + ghostD + '" stroke="rgba(154,165,196,0.45)" stroke-width="2" fill="none" stroke-dasharray="6 5" stroke-linecap="round"/>';
+
+        // today line + area
+        let pathD = '';
+        Y.today.forEach((v, i) => {
+          pathD += (i === 0 ? 'M' : ' L') + ' ' + (padL + xStep * i).toFixed(1) + ' ' + yScale(v).toFixed(1);
+        });
+        const areaD = pathD + ' L ' + (padL + xStep * (Y.labels.length - 1)) + ' ' + (padT + ih) + ' L ' + padL + ' ' + (padT + ih) + ' Z';
+        h += '<path d="' + areaD + '" fill="url(#dkYA)"/>';
+        h += '<path d="' + pathD + '" stroke="url(#dkYL)" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(0,229,255,0.6));"/>';
+
+        // points + labels
+        Y.today.forEach((v, i) => {
+          const x = padL + xStep * i;
+          const y = yScale(v);
+          h += '<circle cx="' + x + '" cy="' + y + '" r="5" fill="#0a0f1c" stroke="#00e5ff" stroke-width="2.5" style="filter: drop-shadow(0 0 4px #00e5ff);"/>';
+          h += '<text x="' + x + '" y="' + (y - 14) + '" fill="#e6ecff" font-size="11" font-family="JetBrains Mono" text-anchor="middle" font-weight="700">' + v.toFixed(2) + '</text>';
+        });
+
+        // legend
+        h += '<line x1="' + (W - padR - 150) + '" y1="' + (padT - 18) + '" x2="' + (W - padR - 122) + '" y2="' + (padT - 18) + '" stroke="url(#dkYL)" stroke-width="2.8"/>';
+        h += '<text x="' + (W - padR - 116) + '" y="' + (padT - 14) + '" fill="#9aa5c4" font-size="10" font-weight="600">오늘</text>';
+        h += '<line x1="' + (W - padR - 80) + '" y1="' + (padT - 18) + '" x2="' + (W - padR - 52) + '" y2="' + (padT - 18) + '" stroke="rgba(154,165,196,0.45)" stroke-width="2" stroke-dasharray="6 5"/>';
+        h += '<text x="' + (W - padR - 46) + '" y="' + (padT - 14) + '" fill="#9aa5c4" font-size="10" font-weight="600">1개월 전</text>';
+
+        svg.innerHTML = h;
+      }
+      renderYield();
+
+      (function renderYieldStats() {
+        const inv = s2s10 < 0;
+        const inv3 = s3m10 < 0;
+        const state = inv ? { t: '역전 (침체 경고)', c: 'var(--down)' } : s2s10 < 0.15 ? { t: '평탄화', c: 'var(--warn)' } : { t: '정상 우상향', c: 'var(--up)' };
+        const sCol = v => v >= 0 ? 'var(--up)' : 'var(--down)';
+        const sGlow = v => v >= 0 ? 'var(--glow-up)' : 'var(--glow-down)';
+        $('dkYieldStats').innerHTML =
+          '<div class="dk-yield-stat"><div class="dk-l">2Y - 10Y 스프레드</div><div class="dk-v" style="color:' + sCol(s2s10) + ';text-shadow:' + sGlow(s2s10) + ';">' + (s2s10 >= 0 ? '+' : '') + fmt(s2s10, 2) + '%</div></div>' +
+          '<div class="dk-yield-stat"><div class="dk-l">3M - 10Y 스프레드</div><div class="dk-v" style="color:' + sCol(s3m10) + ';text-shadow:' + sGlow(s3m10) + ';">' + (s3m10 >= 0 ? '+' : '') + fmt(s3m10, 2) + '%</div></div>' +
+          '<div class="dk-yield-stat"><div class="dk-l">10Y 금리</div><div class="dk-v">' + fmt(Y.today[iOf('10Y')], 2) + '%</div></div>' +
+          '<div class="dk-yield-stat"><div class="dk-l">곡선 상태</div><div class="dk-v" style="color:' + state.c + ';font-size:15px;">' + state.t + '</div></div>';
+        let w = '';
+        if (inv || inv3) w = '⚠️ 수익률 곡선이 <b>역전 상태</b>입니다. 역전은 역사적으로 경기침체의 강력한 선행지표였습니다. 다만 역전 시작부터 침체까지는 보통 1년 이상 걸렸다는 점도 함께 기억하세요.';
+        else w = '⚠️ 2022~2024년 깊은 역전을 거쳐 곡선이 정상화된 상태입니다(2Y-10Y ' + (s2s10 >= 0 ? '+' : '') + Math.round(s2s10 * 100) + 'bp). <b>역사적으로 역전 해소 후 6~18개월 내 경기침체 진입</b>이 자주 관찰되었으니 고용·신용 지표를 함께 점검하세요. 점선은 1개월 전 곡선 — 곡선의 "변화 방향"이 핵심 정보입니다.';
+        $('dkYieldWarn').innerHTML = w;
+      })();
+
+      // ============ 하이일드 스프레드 ============
+      (function renderHy() {
+        const v = DK_DATA.hy.now;
+        const z = hyZone(v);
+        const numEl = $('dkHyNum');
+        numEl.style.color = z.col;
+        animateNum(numEl, v, 1400, x => x.toFixed(2) + '%');
+        const badge = $('dkHyBadge');
+        badge.textContent = z.name;
+        badge.style.color = z.col;
+        badge.style.borderColor = z.col;
+        $('dkHySub').innerHTML = '역사 평균 약 5.4% · 코로나 \'20.3월 11% · 금융위기 \'08년 20%';
+        // 0~10% 스케일
+        const pos = clamp01(v / 10) * 100;
+        setTimeout(() => { $('dkHyMarker').style.left = Math.max(2, Math.min(98, pos)) + '%'; }, 300);
+        const d = +(v - DK_DATA.hy.prev).toFixed(2);
+        const m = +(v - DK_DATA.hy.m1).toFixed(2);
+        let t = '현재 <b>' + v.toFixed(2) + '%</b>는 ' + (v < 3 ? '역사적으로 매우 낮은 수준 — 신용 시장이 평온하다는 뜻이지만, 동시에 위험이 저평가되어 있을 가능성도 의미합니다.' : v < 5 ? '평상시 범위입니다. 신용 시장에 특별한 스트레스 신호는 없습니다.' : v < 7 ? '경계 수준입니다. 신용 시장이 부도 위험을 높게 보기 시작했다는 신호로, 주식시장 조정에 선행하는 경우가 많습니다.' : '위기 수준입니다. 과거 이 구간에서는 항상 큰 폭의 주가 조정이 동반됐습니다.');
+        t += ' <span style="color:var(--txt-3);">1개월 전 대비 ' + (m >= 0 ? '+' : '') + m.toFixed(2) + '%p ' + (Math.abs(m) < 0.15 ? '(큰 변화 없음)' : m > 0 ? '— 확대 추세 주의' : '— 개선 추세') + '</span>';
+        $('dkHyInterp').innerHTML = t;
+      })();
+
+      // ============ 섹터 트리맵 ============
+      function renderSectors() {
+        const grid = $('dkSectorGrid');
+        const sorted = DK_DATA.sectors.slice().sort((a, b) => b.w - a.w);
+        sorted.forEach(s => {
+          const isUp = s.pct >= 0;
+          const abs = Math.abs(s.pct);
+          const intensity = Math.min(1, abs / 1.5);
+          const base = isUp ? '0,255,163' : '255,88,113';
+          const tile = document.createElement('div');
+          tile.className = 'dk-sector-tile';
+          tile.style.flexGrow = s.w;
+          tile.style.flexBasis = (s.w * 9) + 'px';
+          tile.style.background = 'linear-gradient(135deg, rgba(' + base + ',' + (0.06 + intensity * 0.18) + '), rgba(' + base + ',' + (0.02 + intensity * 0.06) + '))';
+          tile.style.borderColor = 'rgba(' + base + ',' + (0.18 + intensity * 0.32) + ')';
+          tile.innerHTML =
+            '<div class="dk-sector-name">' + s.name + '</div>' +
+            '<div>' +
+            '<div class="dk-sector-pct" style="color:' + (isUp ? '#00ffa3' : '#ff5871') + ';text-shadow:0 0 12px rgba(' + base + ',0.4);">' + (isUp ? '+' : '') + s.pct.toFixed(2) + '%</div>' +
+            '<div class="dk-sector-bar"><div class="dk-sector-bar-fill" data-w="' + (intensity * 100) + '" style="background:' + (isUp ? '#00ffa3' : '#ff5871') + ';"></div></div>' +
+            '<div class="dk-sector-w">시총 비중 ~' + s.w + '%</div>' +
+            '</div>';
+          grid.appendChild(tile);
+        });
+        setTimeout(() => {
+          document.querySelectorAll('.dk-sector-bar-fill').forEach(el => {
+            el.style.width = el.dataset.w + '%';
+          });
+        }, 400);
+      }
+      renderSectors();
+
+      // ============ 매크로 테이블 ============
+      (function renderEcon() {
+        const toneCol = t => t === 'good' ? 'var(--up)' : t === 'bad' ? 'var(--down)' : 'var(--txt-2)';
+        let h = '<div class="dk-econ-row dk-head"><div>지표</div><div>현재값</div><div>변화</div><div>분류</div></div>';
+        h += DK_DATA.econ.map(e =>
+          '<div class="dk-econ-row">' +
+          '<div class="dk-econ-ind"><span class="dk-flag dk-flag-' + e.flag.toLowerCase() + '">' + e.flag + '</span>' + e.name + '</div>' +
+          '<div class="dk-econ-val">' + e.val + '<span style="color:var(--txt-3);">' + e.suf + '</span></div>' +
+          '<div class="dk-econ-delta" style="color:' + toneCol(e.tone) + ';">' + e.delta + '</div>' +
+          '<div class="dk-econ-cat">' + e.cat + '</div>' +
+          '</div>'
+        ).join('');
+        $('dkEcon').innerHTML = h;
+      })();
+
+      // ============ 경제 캘린더 ============
+      (function renderCal() {
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const rows = DK_DATA.calendar
+          .map(e => {
+            const d = new Date(e.date + 'T00:00:00');
+            const dd = Math.round((d - now) / 86400000);
+            return Object.assign({}, e, { dd, dateObj: d });
+          })
+          .filter(e => e.dd >= -1 && e.dd <= 30)
+          .sort((a, b) => a.dd - b.dd)
+          .slice(0, 6);
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        if (!rows.length) {
+          $('dkCal').innerHTML = '<div class="dk-cal-row"><div class="dk-cal-dday">—</div><div class="dk-cal-date"></div><div class="dk-cal-name">30일 내 예정된 주요 이벤트가 없습니다.</div><div></div></div>';
+          return;
+        }
+        $('dkCal').innerHTML = rows.map(e => {
+          const ddTxt = e.dd < 0 ? '진행중' : e.dd === 0 ? 'D-DAY' : 'D-' + e.dd;
+          const hot = e.dd >= 0 && e.dd <= 3;
+          const dateTxt = (e.dateObj.getMonth() + 1) + '/' + e.dateObj.getDate() + ' (' + days[e.dateObj.getDay()] + ')';
+          const dots = [1, 2, 3].map(i => '<i class="' + (i <= e.imp ? 'on' : '') + '"></i>').join('');
+          return '<div class="dk-cal-row' + (e.dd === 0 ? ' dk-cal-today' : '') + '">' +
+            '<div class="dk-cal-dday' + (hot ? ' hot' : '') + '">' + ddTxt + '</div>' +
+            '<div class="dk-cal-date">' + dateTxt + '</div>' +
+            '<div class="dk-cal-name">' + e.name + (e.sub ? '<small>' + e.sub + '</small>' : '') + '</div>' +
+            '<div class="dk-cal-imp">' + dots + '</div>' +
+            '</div>';
+        }).join('');
+      })();
+
+      // ============ INFO TOGGLE ============
+      window.dkInfo = function (id) {
+        const el = $(id);
+        if (el) el.classList.toggle('dk-show');
+      };
+
+      // ============ SCROLL FADE ============
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              e.target.classList.add('dk-visible');
+              io.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.dk-section').forEach(s => io.observe(s));
+      } else {
+        document.querySelectorAll('.dk-section').forEach(s => s.classList.add('dk-visible'));
+      }
+
+      // ============ ACTIVE NAV ON SCROLL ============
+      const navItems = document.querySelectorAll('.dk-nav-item');
+      const sections = Array.from(document.querySelectorAll('.dk-section'));
+      function setActive() {
+        let cur = sections[0];
+        const sy = window.scrollY + 200;
+        sections.forEach(s => { if (s.offsetTop <= sy) cur = s; });
+        navItems.forEach(n => {
+          n.classList.toggle('active', n.getAttribute('href') === '#' + cur.id);
+        });
+      }
+      window.addEventListener('scroll', setActive, { passive: true });
+      setActive();
+
+      // ============ SMOOTH SCROLL ============
+      navItems.forEach(n => {
+        n.addEventListener('click', (e) => {
+          e.preventDefault();
+          const id = n.getAttribute('href').slice(1);
+          const t = $(id);
+          if (t) window.scrollTo({ top: t.offsetTop - 20, behavior: 'smooth' });
+        });
+      });
+
+      // ============ BOOKMARK BUTTON ============
+      (function () {
+        const btn = $('dkBookmarkBtn');
+        const modal = $('dkBmModal');
+        const sc = $('dkBmShortcut');
+        const desc = $('dkBmDesc');
+        if (!btn || !modal) return;
+
+        const ua = navigator.userAgent;
+        const isMac = /Mac|iPhone|iPad|iPod/.test(ua);
+        const isIOS = /iPhone|iPad|iPod/.test(ua);
+        const isAndroid = /Android/.test(ua);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+        const isFirefox = /Firefox/i.test(ua);
+
+        let key = isMac ? '⌘ + D' : 'Ctrl + D';
+        let descHtml = '위 키를 눌러 즐겨찾기에 바로 추가할 수 있어요.<br/>저장 후 매일 아침 한 번씩 들러주세요.';
+
+        if (isIOS) {
+          key = '하단 공유 → "북마크 추가"';
+          descHtml = '브라우저 하단의 <b>공유 버튼(⬆)</b>을 누른 뒤<br/><b>"북마크 추가"</b>를 선택하세요.';
+        } else if (isAndroid) {
+          key = '메뉴(⋮) → "북마크 ★"';
+          descHtml = '브라우저 우측 상단 <b>메뉴(⋮)</b>를 누른 뒤<br/><b>별표(★) 아이콘</b>을 탭하세요.';
+        } else if (isSafari) {
+          key = '⌘ + D';
+          descHtml = 'Mac Safari에서 <b>⌘ + D</b>를 누르면<br/>즐겨찾기 추가 창이 바로 열려요.';
+        } else if (isFirefox) {
+          descHtml = 'Firefox에서 <b>Ctrl + D</b>(또는 ⌘ + D)를 누르면<br/>북마크 저장 창이 즉시 열립니다.';
+        }
+
+        sc.textContent = key;
+        desc.innerHTML = descHtml;
+
+        function openModal() {
+          try {
+            if (window.external && 'AddFavorite' in window.external) {
+              window.external.AddFavorite(location.href, document.title);
+              return;
+            }
+          } catch (_) { }
+          modal.classList.add('dk-show');
+          modal.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+          modal.classList.remove('dk-show');
+          modal.setAttribute('aria-hidden', 'true');
+          document.body.style.overflow = '';
+        }
+
+        btn.addEventListener('click', openModal);
+        modal.querySelectorAll('[data-dk-close]').forEach(el => {
+          el.addEventListener('click', closeModal);
+        });
+        document.addEventListener('keydown', e => {
+          if (e.key === 'Escape' && modal.classList.contains('dk-show')) closeModal();
+        });
+      })();
+    })();
+  </script>
+
+  <!-- =====================================================
+  하단 본문 — 각 지표 해설 (붙여넣기용)
+  ===================================================== -->
+  <div
+    style="max-width:740px;margin:40px auto 0;font-family:'Noto Sans KR',Apple SD Gothic Neo,sans-serif;color:#2d2d2d;line-height:1.9;font-size:15px;">
+
+    <!-- 안내 박스 -->
+    <div
+      style="background:#EBF5FF;border-left:5px solid #3A7BD5;padding:16px 20px;border-radius:0 8px 8px 0;margin-bottom:32px;">
+      위 대시보드는 매일 자동으로 갱신됩니다. 숫자가 의미하는 바를 모르면 그냥 지나치기 쉬운데, 아래에서 각 지표를 하나씩 풀어볼게요. 한 번만 읽어두면 매일 아침 대시보드를 훨씬 입체적으로 볼 수 있습니다.
+    </div>
+
+    <!-- ── Fear & Greed Index ── -->
+    <h2
+      style="font-size:19px;font-weight:700;color:#1a1a2e;padding-bottom:8px;border-bottom:2px solid #3A7BD5;margin:0 0 14px;">
+      ① 공포·탐욕 지수 (Fear &amp; Greed Index)</h2>
+    <div style="padding:0 0 28px 18px;">
+      <p>CNN이 만든 지표인데, 쉽게 말하면 <strong style="color:#2c7be5;font-weight:700;">"지금 시장이 얼마나 흥분해 있는가"</strong>를 0~100으로 표현한
+        숫자예요. 0에 가까울수록 극도의 공포, 100에 가까울수록 극도의 탐욕입니다.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;">
+        <thead>
+          <tr style="background:#3A7BD5;color:#fff;">
+            <th style="padding:10px 14px;text-align:left;">구간</th>
+            <th style="padding:10px 14px;text-align:left;">의미</th>
+            <th style="padding:10px 14px;text-align:left;">투자자 심리</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">0~24</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">극도의 공포</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">다들 팔고 싶어 함</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">25~44</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">공포</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">불안감 우세</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">45~55</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">중립</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">눈치 보는 중</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">56~74</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">탐욕</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">사고 싶어 함</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;">75~100</td>
+            <td style="padding:9px 14px;">극도의 탐욕</td>
+            <td style="padding:9px 14px;">FOMO 절정</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>이 지수의 핵심은 <strong>역발상의 도구</strong>라는 점이에요. 워런 버핏이 했다는 말 — "남들이 탐욕스러울 때 두려워하고, 남들이 두려워할 때 탐욕스러워라" — 이게 이 지수를 어떻게
+        쓰는지 그대로 설명해줍니다.</p>
+
+      <div
+        style="background:#FFF8E7;border-left:4px solid #F5A623;padding:14px 18px;border-radius:0 8px 8px 0;margin-top:4px;">
+        <strong>주의할 점:</strong> 탐욕 구간이 길게 이어진다고 당장 폭락하는 건 아니에요. 2021년에 80대를 수개월 유지했지만 시장은 계속 올랐거든요. 추세 확인용이지 타이밍 도구로 쓰면
+        낭패 보기 쉽습니다.
+      </div>
+    </div>
+
+    <!-- ── 버핏 지표 ── -->
+    <h2
+      style="font-size:19px;font-weight:700;color:#1a1a2e;padding-bottom:8px;border-bottom:2px solid #3A7BD5;margin:0 0 14px;">
+      ② 버핏 지표 (Buffett Indicator)</h2>
+    <div style="padding:0 0 28px 18px;">
+      <p>워런 버핏이 2001년 인터뷰에서 <strong>"주식시장 전체 밸류에이션을 판단하는 단일 최고 지표"</strong>라고 소개한 이후 이 이름이 붙었어요. 계산 방식은 단순합니다.</p>
+
+      <div
+        style="background:#1a1a2e;border-radius:8px;padding:16px 20px;font-family:monospace;font-size:13px;color:#e0e0e0;margin:16px 0;">
+        <span style="color:#90EE90;">/* 버핏 지표 공식 */</span><br>
+        버핏 지표 = <span style="color:#ffd700;">미국 전체 주식시장 시가총액</span> ÷ <span style="color:#ffd700;">미국 GDP</span> × 100
+      </div>
+
+      <p>예를 들어 지표가 <strong style="color:#2c7be5;font-weight:700;">100%</strong>면 "시장 가치 = 경제 규모", <strong
+          style="color:#2c7be5;font-weight:700;">200% 이상</strong>이면 경제 규모 대비 주식이 2배 부풀어 있다는 뜻입니다. <strong
+          style="color:#E53E3E;font-weight:700;">200%를 넘는 구간</strong>은 역사적으로 닷컴버블·2021년 정점 부근에서만 나타났던 고평가 영역입니다. 오늘의 정확한
+        수치는 위 대시보드 게이지에서 바로 확인하세요.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;">
+        <thead>
+          <tr style="background:#3A7BD5;color:#fff;">
+            <th style="padding:10px 14px;text-align:left;">구간</th>
+            <th style="padding:10px 14px;text-align:left;">판단</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">~75%</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">저평가 — 매수 기회</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">75~100%</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">적정 수준</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">100~150%</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">다소 고평가</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;">150% 이상</td>
+            <td style="padding:9px 14px;">위험 구간 — 버핏은 현금 비중 높임</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="background:#FFF0F0;border-left:4px solid #E53E3E;padding:14px 18px;border-radius:0 8px 8px 0;">
+        <strong>한계도 알고 써야 합니다.</strong> 요즘은 미국 빅테크가 글로벌 매출을 올리는 구조라 GDP 대비 시가총액이 과거보다 구조적으로 높게 나오는 경향이 있어요. "버블이다"고
+        단정하기보단 "조심할 필요는 있다"는 신호 정도로 읽는 게 맞습니다.
+      </div>
+    </div>
+
+    <!-- ── VIX ── -->
+    <h2
+      style="font-size:19px;font-weight:700;color:#1a1a2e;padding-bottom:8px;border-bottom:2px solid #3A7BD5;margin:0 0 14px;">
+      ③ VIX — 시장의 체온계</h2>
+    <div style="padding:0 0 28px 18px;">
+      <p>VIX는 "변동성 지수(Volatility Index)"의 약자로, S&amp;P 500 옵션 가격을 바탕으로 <strong>앞으로 30일간 시장이 얼마나 흔들릴 것 같은지</strong>를 수치화한
+        거예요. "공포 지수"라고도 불립니다.</p>
+
+      <p>비유하자면 날씨 예보에서 강수 확률 같은 거예요. VIX 20이면 "앞으로 한 달 S&amp;P 500이 연간 환산 기준 ±20% 정도 흔들릴 것 같다"는 시장의 예측입니다.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;">
+        <thead>
+          <tr style="background:#3A7BD5;color:#fff;">
+            <th style="padding:10px 14px;text-align:left;">VIX 수준</th>
+            <th style="padding:10px 14px;text-align:left;">시장 분위기</th>
+            <th style="padding:10px 14px;text-align:left;">역사적 사례</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">~15</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">매우 안정</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">2017~2018 강세장</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">15~20</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">안정 구간</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">일반적인 장세</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">20~30</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">불안정 시작</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">조정 신호</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">30~40</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">공포 구간</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">2020년 3월 코로나 초입</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;">80+</td>
+            <td style="padding:9px 14px;">극도의 공포</td>
+            <td style="padding:9px 14px;">2020년 3월 최고점(85)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="background:#f5f5f5;border-radius:8px;padding:16px 20px;margin-bottom:20px;">
+        VIX <strong style="color:#2c7be5;font-weight:700;">20 이하</strong>면 대체로 안정 구간, 30을 넘으면 시장이 흔들리고 있다는 뜻이에요. 오늘 수치는
+        위 대시보드 게이지에서 확인하세요. 역설적으로, VIX가 낮을 때 방심하다가 갑자기 튀어오르는 경우가 많아서 저는 오히려 낮을 때 더 신경 씁니다.
+      </div>
+    </div>
+
+    <!-- ── 10년물 금리 ── -->
+    <h2
+      style="font-size:19px;font-weight:700;color:#1a1a2e;padding-bottom:8px;border-bottom:2px solid #3A7BD5;margin:0 0 14px;">
+      ④ 미국 10년물 국채 금리</h2>
+    <div style="padding:0 0 28px 18px;">
+      <p>주식 투자하는 분들이 채권 금리를 왜 봐야 할까 싶을 수 있는데, 사실 이게 주식시장에 제일 직접적인 영향을 주는 지표 중 하나입니다. 재래시장 비유로 설명해볼게요.</p>
+
+      <p>마트(주식)와 동네 은행(채권)이 같은 골목에 있다고 생각해봐요. 은행 예금 금리가 1%면 굳이 리스크 감수하면서 마트에서 주식 살 이유가 크죠. 그런데 은행 금리가 5%로 올라버리면? "그냥 은행에
+        넣어두지" 하는 사람이 늘어나면서 주식에서 돈이 빠져나갑니다. 이게 "금리 상승 → 주식 하락 압력"의 원리예요.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;">
+        <thead>
+          <tr style="background:#3A7BD5;color:#fff;">
+            <th style="padding:10px 14px;text-align:left;">금리 방향</th>
+            <th style="padding:10px 14px;text-align:left;">주식 영향</th>
+            <th style="padding:10px 14px;text-align:left;">특히 타격받는 곳</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">상승</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">하락 압력</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">성장주, 기술주, 부동산(REITs)</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;">하락</td>
+            <td style="padding:9px 14px;">상승 지지</td>
+            <td style="padding:9px 14px;">성장주 밸류에이션 상승</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>10년물이 <strong style="color:#2c7be5;font-weight:700;">4%대</strong>면 역사적으로 높은 편이에요. 2020~2021년엔 0.5~1.5%
+        수준이었으니까요. 오늘의 금리는 위 수익률 곡선 차트에서 만기별로 확인할 수 있습니다. 특히 나스닥 기술주들은 "미래 이익의 현재 가치"로 평가받는데, 금리가 높을수록 그 미래 이익의 현재 가치가
+        낮아지는 구조라 직격탄을 맞습니다.</p>
+
+      <div style="background:#EBF5FF;border-left:4px solid #3A7BD5;padding:14px 18px;border-radius:0 8px 8px 0;">
+        <strong>수익률 곡선(Yield Curve)도 같이 봐야 합니다.</strong> 2년물 금리와 10년물 금리가 역전(단기 &gt; 장기)되면 경기침체 신호로 읽히는데, 대시보드의 수익률 곡선
+        차트 아래 스프레드 값이 플러스면 정상, 마이너스면 역전 상태입니다. 한 달 전 곡선(점선)과 비교해 방향까지 읽어보세요.
+      </div>
+    </div>
+
+    <!-- ── 김치 프리미엄 ── -->
+    <h2
+      style="font-size:19px;font-weight:700;color:#1a1a2e;padding-bottom:8px;border-bottom:2px solid #3A7BD5;margin:0 0 14px;">
+      ⑤ 김치 프리미엄</h2>
+    <div style="padding:0 0 28px 18px;">
+      <p>같은 비트코인인데 한국 거래소(업비트) 가격이 해외 가격보다 비싸게 거래되는 현상이에요. 그 차이를 퍼센트로 나타낸 게 <strong>김치 프리미엄</strong>입니다.</p>
+
+      <div
+        style="background:#1a1a2e;border-radius:8px;padding:16px 20px;font-family:monospace;font-size:13px;color:#e0e0e0;margin:16px 0;">
+        <span style="color:#90EE90;">/* 김치 프리미엄 공식 */</span><br>
+        김프(%) = ( <span style="color:#ffd700;">업비트 BTC 원화가</span> ÷ ( <span style="color:#ffd700;">해외 BTC 달러가</span> ×
+        <span style="color:#ffd700;">원/달러 환율</span> ) − 1 ) × 100
+      </div>
+
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;">
+        <thead>
+          <tr style="background:#3A7BD5;color:#fff;">
+            <th style="padding:10px 14px;text-align:left;">구간</th>
+            <th style="padding:10px 14px;text-align:left;">의미</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">0% 미만 (역프)</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">국내 투자심리 냉각 — 공포 구간에서 종종 나타남</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">0~3%</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">평상시 수준</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">3~7%</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">국내 매수 열기 과열 조짐</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;">7%+</td>
+            <td style="padding:9px 14px;">위험 신호 — 2018년 초·2021년 상투 때 10~50%까지 치솟았음</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>재미있는 건, 김프가 <strong>한국 개인투자자의 위험선호도 온도계</strong> 역할을 한다는 점이에요. 김프가 급등하면 "국내 개미들이 몰려들고 있다"는 뜻이라 코인뿐 아니라 국내 주식시장
+        심리를 읽는 데도 참고가 됩니다.</p>
+    </div>
+
+    <!-- ── 하이일드 스프레드 ── -->
+    <h2
+      style="font-size:19px;font-weight:700;color:#1a1a2e;padding-bottom:8px;border-bottom:2px solid #3A7BD5;margin:0 0 14px;">
+      ⑥ 하이일드 스프레드 — 신용시장의 경보기</h2>
+    <div style="padding:0 0 28px 18px;">
+      <p>신용등급이 낮은 기업(하이일드, 정크본드)이 돈을 빌릴 때, 미국 국채보다 얼마나 더 높은 금리를 줘야 하는지를 나타내는 지표예요. 쉽게 말해 <strong>"시장이 부도 위험을 얼마로 매기고
+          있는가"</strong>입니다.</p>
+
+      <p>주식보다 채권시장이 위기를 먼저 감지하는 경우가 많아서, 전문 투자자들이 가장 신뢰하는 조기경보 지표 중 하나입니다. 주가가 멀쩡한데 하이일드 스프레드가 슬금슬금 벌어지면 "스마트머니가 먼저
+        빠져나가고 있다"는 신호일 수 있어요.</p>
+
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;">
+        <thead>
+          <tr style="background:#3A7BD5;color:#fff;">
+            <th style="padding:10px 14px;text-align:left;">구간</th>
+            <th style="padding:10px 14px;text-align:left;">의미</th>
+            <th style="padding:10px 14px;text-align:left;">역사적 사례</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">3%p 미만</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">신용시장 안정</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">강세장 평균</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">3~5%p</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">주의</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">조정장 초입에서 자주 관찰</td>
+          </tr>
+          <tr>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">5~7%p</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">경계</td>
+            <td style="padding:9px 14px;border-bottom:1px solid #eee;">2016년 에너지 위기 등</td>
+          </tr>
+          <tr style="background:#f9f9f9;">
+            <td style="padding:9px 14px;">7%p+</td>
+            <td style="padding:9px 14px;">위기</td>
+            <td style="padding:9px 14px;">2020년 3월 코로나(약 11%p), 2008년 금융위기(약 20%p)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="background:#EBF5FF;border-left:4px solid #3A7BD5;padding:14px 18px;border-radius:0 8px 8px 0;">
+        대시보드의 하이일드 막대에 <strong>'20.3 코로나</strong>와 <strong>'08 금융위기</strong> 위치가 표시되어 있으니, 오늘 값이 역사적 위기 대비 어느 정도인지 한눈에
+        비교할 수 있습니다.
+      </div>
+    </div>
+
+    <!-- ── 마무리 ── -->
+    <h2
+      style="font-size:19px;font-weight:700;color:#1a1a2e;padding-bottom:8px;border-bottom:2px solid #3A7BD5;margin:0 0 14px;">
+      지표를 함께 읽는 법</h2>
+    <div style="padding:0 0 28px 18px;">
+      <p>각 지표가 뭘 말하는지 알았다면, 이제 여러 개를 동시에 보는 게 의미 있습니다. 대시보드 맨 위의 <strong>종합 시장 신호등</strong>이 바로 이 조합 읽기를 자동으로 해주는 장치인데,
+        원리는 이렇습니다.</p>
+
+      <div style="background:#f5f5f5;border-radius:8px;padding:16px 20px;margin-bottom:16px;">
+        <strong>🟢 안심할 수 있는 조합 예시</strong><br>
+        Fear &amp; Greed 40대 (중립~약한 탐욕) + VIX 15 이하 + 금리 안정 + 버핏 지표 120%대<br>
+        → 시장이 과열되지 않고 차분하게 오르는 상황
+      </div>
+
+      <div
+        style="background:#FFF8E7;border-left:4px solid #F5A623;padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:16px;">
+        <strong>⚠️ 경계해야 할 조합 예시</strong><br>
+        Fear &amp; Greed 80+ (극도의 탐욕) + VIX 급등 + 금리 상승 + 버핏 지표 200%+ + 하이일드 스프레드 확대<br>
+        → 과열 신호가 여럿 동시에 켜진 상황. 신호등이 🔴로 바뀌는 조합이에요.
+      </div>
+
+      <p>물론 이 지표들이 "지금 당장 팔아라"는 신호는 아닙니다. 저도 이걸 보면서 포지션을 급하게 바꾸지는 않아요. 다만 신규 매수를 할 때 "지금이 욕심 부릴 타이밍인가"를 한 번 더 생각하게 해주는
+        장치로 씁니다. 매일 아침 30초만 대시보드를 보는 습관, 한 번 만들어보세요.</p>
+    </div>
+
+    <!-- 마무리 박스 -->
+    <div
+      style="background:#EBF5FF;border-left:5px solid #3A7BD5;padding:16px 20px;border-radius:0 8px 8px 0;margin-top:8px;">
+      대시보드 수치는 매일 자동 갱신되지만, 지표의 의미는 변하지 않아요. 오늘 숫자가 바뀌어도 이 해설을 기억해두면 계속 써먹을 수 있습니다. 관련 글도 아래에 연결해뒀으니 같이 보시면 더 도움이 될 거예요.
+      <br><br>
+      📌 함께 읽으면 좋은 글<br>
+      · <a
+        href="https://insight-moneyflow.tistory.com/category/%ED%95%B4%EC%99%B8%20%EC%A3%BC%EC%8B%9D%20%EA%B2%BD%EC%A0%9C"
+        style="color:#2c7be5;">미국 주식 주간 증시 요약 보기</a><br>
+      · <a
+        href="https://insight-moneyflow.tistory.com/category/%EA%B2%BD%EC%A0%9C%20%EC%83%81%EC%8B%9D/%EC%9A%A9%EC%96%B4"
+        style="color:#2c7be5;">경제 용어 해설 모음</a>
+    </div>
+
+  </div>
+</body>
+
+</html>

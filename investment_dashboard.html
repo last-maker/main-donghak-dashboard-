@@ -4160,6 +4160,23 @@
     </div>
 
   </div>
+
+  <!-- iframe 임베드용: 부모(티스토리)에 콘텐츠 높이를 알려 자동 높이 조절 -->
+  <script>
+    (function () {
+      function dkPostHeight() {
+        try {
+          parent.postMessage({ type: "dk-height", h: document.documentElement.scrollHeight }, "*");
+        } catch (e) { }
+      }
+      if (window.self !== window.top) {
+        window.addEventListener("load", dkPostHeight);
+        window.addEventListener("resize", dkPostHeight);
+        if (window.ResizeObserver) new ResizeObserver(dkPostHeight).observe(document.body);
+        setInterval(dkPostHeight, 2000);
+      }
+    })();
+  </script>
 </body>
 
 </html>
